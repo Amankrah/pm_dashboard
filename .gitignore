@@ -1,0 +1,11 @@
+.DS_Store
+Thumbs.db
+
+# Next.js app (see web/.gitignore for full list)
+web/node_modules/
+web/.next/
+web/out/
+web/.env
+web/.env.local
+web/*.db
+web/*.db-journal

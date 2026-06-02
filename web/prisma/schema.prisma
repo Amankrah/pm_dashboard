@@ -1,0 +1,130 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model AllowedUser {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  role      String   @default("viewer")
+  createdAt DateTime @default(now())
+}
+
+model ReportingPeriod {
+  id          String       @id @default(cuid())
+  label       String
+  slug        String       @unique
+  startDate   String?
+  endDate     String?
+  status      String       @default("open")
+  createdAt   DateTime     @default(now())
+  invites     FormInvite[]
+  submissions Submission[]
+}
+
+model FormInvite {
+  id          String          @id @default(cuid())
+  token       String          @unique
+  periodId    String
+  period      ReportingPeriod @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  email       String?
+  fullName    String?
+  faculty     String?
+  expiresAt   DateTime?
+  submittedAt DateTime?
+  createdAt   DateTime        @default(now())
+  submission  Submission?
+
+  @@index([periodId])
+}
+
+model Submission {
+  id                         String          @id @default(cuid())
+  periodId                   String
+  inviteId                   String?         @unique
+  fullName                   String
+  email                      String
+  faculty                    String
+  department                 String
+  position                   String
+  submissionDate             String
+  resourcesNeeded            String?
+  collaborationOpportunities String?
+  challengesBarriers         String?
+  outcomesAchievements       String?
+  otherInformation           String?
+  submittedAt                DateTime        @default(now())
+  period                     ReportingPeriod @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  invite                     FormInvite?     @relation(fields: [inviteId], references: [id])
+  activities                 Activity[]
+
+  @@index([periodId])
+  @@index([email])
+}
+
+model Activity {
+  id                 String          @id @default(cuid())
+  submissionId       String
+  title              String
+  status             String
+  description        String?
+  startDate          String?
+  endDate            String?
+  partnerInstitution String?
+  contactName        String?
+  contactEmail       String?
+  outputs            String?
+  submission         Submission      @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  themes             ActivityTheme[]
+  collaborators      Collaborator[]
+
+  @@index([submissionId])
+}
+
+model ActivityTheme {
+  activityId String
+  theme      String
+  activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  @@id([activityId, theme])
+}
+
+model Collaborator {
+  id         String   @id @default(cuid())
+  activityId String
+  name       String
+  faculty    String?
+  email      String?
+  activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  @@index([activityId])
+}
+
+model PillarTarget {
+  id        String   @id @default(cuid())
+  periodKey String
+  pillar    String
+  target    Int      @default(0)
+  updatedAt DateTime @updatedAt
+
+  @@unique([periodKey, pillar])
+}
+
+model NotificationLog {
+  id        String   @id @default(cuid())
+  type      String
+  toAddress String
+  ccAddress String?
+  subject   String
+  status    String
+  error     String?
+  meta      String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([type])
+}

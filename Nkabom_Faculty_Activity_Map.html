@@ -1,0 +1,1708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nkabom — Faculty Activity Map</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root {
+  --mcgill-red:    #c8102e;
+  --mcgill-dark:   #1e3a5f;
+  --mcgill-mid:    #2563a8;
+  --mcgill-light:  #eef3fa;
+  --edu-color:     #1e5fa8;
+  --acc-color:     #1a6b44;
+  --ent-color:     #a05c00;
+  --sidebar-w:     238px;
+  --white:         #ffffff;
+  --gray-50:       #f8fafc;
+  --gray-100:      #f1f5f9;
+  --gray-200:      #e2e8f0;
+  --gray-500:      #64748b;
+  --gray-700:      #334155;
+  --gray-900:      #0f172a;
+  --shadow-sm:     0 1px 3px rgba(0,0,0,0.07);
+  --shadow-md:     0 4px 12px rgba(0,0,0,0.09);
+  --radius:        10px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', Arial, sans-serif; background: #edf1f7; color: var(--gray-900); display: flex; min-height: 100vh; }
+
+/* ── Sidebar ── */
+.sidebar { width: var(--sidebar-w); background: linear-gradient(180deg, #152c47 0%, #1e3a5f 100%); min-height: 100vh; position: fixed; top: 0; left: 0; display: flex; flex-direction: column; z-index: 100; overflow-y: auto; }
+.sidebar-brand { padding: 20px 18px 16px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.sidebar-brand .logo { font-size: 22px; margin-bottom: 6px; }
+.sidebar-brand .name { font-size: 13px; font-weight: 800; color: #fff; line-height: 1.3; }
+.sidebar-brand .sub  { font-size: 10px; color: rgba(255,255,255,0.55); margin-top: 2px; letter-spacing: 0.3px; }
+.sidebar-nav { padding: 12px 0; flex: 1; }
+.nav-section-label { font-size: 9.5px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: rgba(255,255,255,0.35); padding: 10px 18px 4px; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 18px; cursor: pointer; font-size: 12.5px; font-weight: 600; color: rgba(255,255,255,0.7); transition: background 0.15s, color 0.15s; border-left: 3px solid transparent; }
+.nav-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
+.nav-item.active { background: rgba(37,99,168,0.3); color: #fff; border-left-color: #60a5fa; }
+.nav-item .icon { font-size: 15px; width: 20px; text-align: center; flex-shrink: 0; }
+.sidebar-footer { padding: 14px 18px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 10px; color: rgba(255,255,255,0.35); line-height: 1.5; }
+
+/* ── Main ── */
+.main { margin-left: var(--sidebar-w); flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+.topbar { background: #1e3a5f; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 56px; border-bottom: 3px solid #60a5fa; gap: 12px; }
+.topbar-title { font-size: 14px; font-weight: 700; color: #fff; white-space: nowrap; }
+.topbar-period { display: flex; align-items: center; gap: 8px; }
+.topbar-period label { font-size: 11px; color: rgba(255,255,255,0.6); white-space: nowrap; }
+.topbar-period select { background: rgba(255,255,255,0.12); color: #fff; border: 1px solid rgba(255,255,255,0.25); border-radius: 6px; padding: 5px 10px; font-size: 12px; font-family: inherit; cursor: pointer; }
+.topbar-period select option { background: #1e3a5f; color: #fff; }
+.topbar-meta { display: flex; gap: 8px; }
+.pill { background: rgba(255,255,255,0.12); padding: 3px 10px; border-radius: 12px; font-size: 11px; color: rgba(255,255,255,0.75); white-space: nowrap; }
+.topbar-actions { display: flex; gap: 8px; }
+.btn-sm { font-size: 12px; font-weight: 600; padding: 6px 14px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 6px; border: none; transition: opacity 0.15s; white-space: nowrap; }
+.btn-sm:hover { opacity: 0.85; }
+.btn-primary-sm { background: var(--mcgill-red); color: #fff; }
+.btn-navy-sm    { background: var(--mcgill-dark); color: #fff; }
+.btn-outline-sm { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.3); }
+.btn-green-sm   { background: var(--acc-color); color: #fff; }
+.content { padding: 24px 28px; flex: 1; }
+.view { display: none; }
+.view.active { display: block; }
+
+/* ── Stat cards ── */
+.stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+.stat-card { background: var(--white); border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow-sm); border-top: 4px solid transparent; position: relative; overflow: hidden; }
+.stat-card::after { content: attr(data-icon); position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: 32px; opacity: 0.08; }
+.stat-card .label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gray-500); margin-bottom: 6px; }
+.stat-card .value { font-size: 32px; font-weight: 800; line-height: 1; color: var(--gray-900); }
+.stat-card .sub   { font-size: 11px; color: var(--gray-500); margin-top: 4px; }
+.stat-card.red   { border-top-color: var(--edu-color); }
+.stat-card.green { border-top-color: var(--acc-color); }
+.stat-card.amber { border-top-color: var(--ent-color); }
+.stat-card.navy  { border-top-color: var(--mcgill-dark); }
+
+/* ── Section heading ── */
+.section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.section-head h3 { font-size: 14px; font-weight: 700; color: #1e3a5f; }
+.section-head .hint { font-size: 11px; color: var(--gray-500); }
+
+/* ── Pillar progress (overview) ── */
+.pillar-progress-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+.pillar-card { background: var(--white); border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow-sm); border-top: 4px solid transparent; }
+.pillar-card.edu { border-top-color: var(--edu-color); }
+.pillar-card.acc { border-top-color: var(--acc-color); }
+.pillar-card.ent { border-top-color: var(--ent-color); }
+.pillar-name { font-size: 13px; font-weight: 800; margin-bottom: 2px; }
+.pillar-card.edu .pillar-name { color: var(--edu-color); }
+.pillar-card.acc .pillar-name { color: var(--acc-color); }
+.pillar-card.ent .pillar-name { color: var(--ent-color); }
+.pillar-counts { display: flex; gap: 12px; margin: 10px 0 12px; }
+.pillar-count-item { text-align: center; }
+.pillar-count-item .num  { font-size: 20px; font-weight: 800; line-height: 1; }
+.pillar-count-item .lbl  { font-size: 9.5px; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.3px; margin-top: 1px; }
+.pillar-count-item.done  .num { color: #15803d; }
+.pillar-count-item.going .num { color: var(--ent-color); }
+.pillar-count-item.plan  .num { color: var(--mcgill-dark); }
+.pillar-bar-outer { height: 8px; background: var(--gray-100); border-radius: 4px; overflow: hidden; position: relative; }
+.pillar-bar-inner { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+.pillar-target-line { position: absolute; top: -2px; width: 2px; height: 12px; background: #dc2626; border-radius: 1px; transition: left 0.6s ease; }
+
+/* ── Charts row ── */
+.charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+.chart-card { background: var(--white); border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow-sm); }
+.chart-card h4 { font-size: 13px; font-weight: 700; color: var(--mcgill-dark); margin-bottom: 14px; }
+.chart-container { position: relative; height: 200px; }
+
+/* ── Faculty strip ── */
+.faculty-strip { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 20px; }
+.faculty-eng-card { background: var(--white); border-radius: var(--radius); padding: 14px 16px; box-shadow: var(--shadow-sm); border-left: 4px solid var(--gray-200); }
+.faculty-eng-card.submitted { border-left-color: var(--mcgill-mid); }
+.faculty-eng-name   { font-size: 12px; font-weight: 700; color: var(--gray-900); margin-bottom: 4px; }
+.faculty-eng-status { font-size: 11px; }
+.faculty-eng-status.submitted { color: var(--acc-color); font-weight: 600; }
+.faculty-eng-status.pending   { color: var(--gray-500); }
+.faculty-eng-count  { font-size: 20px; font-weight: 800; color: var(--mcgill-dark); margin-top: 6px; }
+.faculty-eng-sub    { font-size: 10px; color: var(--gray-500); }
+
+/* ── Activity table ── */
+.filter-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; align-items: center; }
+.filter-bar input, .filter-bar select { border: 1.5px solid var(--gray-200); border-radius: 7px; padding: 7px 12px; font-size: 13px; font-family: inherit; background: var(--white); color: var(--gray-900); }
+.filter-bar input:focus, .filter-bar select:focus { outline: none; border-color: var(--mcgill-mid); }
+.filter-bar input { flex: 1; min-width: 180px; }
+.table-wrap { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow-sm); overflow: hidden; }
+.data-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.data-table th { background: #1e3a5f; color: #fff; padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; white-space: nowrap; }
+.data-table td { padding: 10px 14px; border-bottom: 1px solid var(--gray-100); vertical-align: middle; }
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: #f0f6ff; }
+.data-table .no-data { text-align: center; color: var(--gray-500); padding: 32px; font-style: italic; }
+.theme-tag { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; margin: 1px; color: #fff; white-space: nowrap; }
+.theme-tag.edu { background: var(--edu-color); }
+.theme-tag.acc { background: var(--acc-color); }
+.theme-tag.ent { background: var(--ent-color); }
+.status-dot { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+.status-dot::before { content: ''; width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.status-dot.completed::before { background: #15803d; }
+.status-dot.ongoing::before   { background: var(--ent-color); }
+.status-dot.planned::before   { background: var(--mcgill-dark); }
+.status-dot.completed { color: #15803d; }
+.status-dot.ongoing   { color: var(--ent-color); }
+.status-dot.planned   { color: var(--mcgill-dark); }
+
+/* ── Faculty cards view ── */
+.faculty-cards-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.faculty-detail-card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow-sm); overflow: hidden; }
+.faculty-detail-header { background: linear-gradient(135deg, #152c47, #1e3a5f); color: #fff; padding: 14px 18px; display: flex; align-items: flex-start; gap: 12px; }
+.faculty-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--mcgill-mid); display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; color: #fff; flex-shrink: 0; }
+.faculty-detail-name { font-size: 14px; font-weight: 700; }
+.faculty-detail-meta { font-size: 11px; color: rgba(255,255,255,0.65); margin-top: 2px; }
+.faculty-detail-body { padding: 14px 18px; }
+.faculty-pillars { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.faculty-activity-item { padding: 8px 0; border-bottom: 1px solid var(--gray-100); font-size: 12px; }
+.faculty-activity-item:last-child { border-bottom: none; }
+.faculty-act-title { font-weight: 600; color: var(--gray-900); margin-bottom: 3px; }
+.faculty-act-meta  { color: var(--gray-500); display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* ── Pillars dedicated view ── */
+.pillar-full-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+.pillar-full-card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow-sm); overflow: hidden; }
+.pillar-full-header { padding: 16px 22px; display: flex; align-items: center; justify-content: space-between; }
+.pillar-full-header.edu { background: linear-gradient(135deg, #1a4a8a, var(--edu-color)); color: #fff; }
+.pillar-full-header.acc { background: linear-gradient(135deg, #0f4a2c, var(--acc-color)); color: #fff; }
+.pillar-full-header.ent { background: linear-gradient(135deg, #7a4300, var(--ent-color)); color: #fff; }
+.pillar-full-title { font-size: 16px; font-weight: 800; }
+.pillar-full-sub   { font-size: 12px; opacity: 0.75; margin-top: 3px; }
+.pillar-full-stat  { text-align: right; }
+.pillar-full-stat .big { font-size: 32px; font-weight: 800; line-height: 1; }
+.pillar-full-stat .sm  { font-size: 11px; opacity: 0.75; }
+.pillar-full-body { padding: 20px 22px; }
+.pillar-stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px; }
+.pillar-mini-stat { background: var(--gray-50); border-radius: 8px; padding: 12px 14px; text-align: center; }
+.pillar-mini-stat .n { font-size: 22px; font-weight: 800; }
+.pillar-mini-stat .l { font-size: 10px; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.4px; margin-top: 2px; }
+.pillar-target-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.pillar-target-label { font-size: 11px; font-weight: 600; color: var(--gray-700); width: 110px; flex-shrink: 0; }
+.gauge-outer { flex: 1; height: 16px; background: var(--gray-100); border-radius: 8px; overflow: visible; position: relative; }
+.gauge-inner { height: 100%; border-radius: 8px; transition: width 0.6s ease; }
+.gauge-target-line { position: absolute; top: -3px; width: 3px; height: 22px; background: #dc2626; border-radius: 2px; transition: left 0.6s ease; }
+.gauge-label { font-size: 11px; font-weight: 700; width: 80px; text-align: right; flex-shrink: 0; }
+.pillar-activities-list { margin-top: 14px; }
+.pillar-act-item { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--gray-100); }
+.pillar-act-item:last-child { border-bottom: none; }
+.pillar-act-info .title { font-size: 12px; font-weight: 600; color: var(--gray-900); }
+.pillar-act-info .meta  { font-size: 11px; color: var(--gray-500); margin-top: 2px; display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ── Partner view ── */
+.partner-grid-view { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.partner-card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow-sm); overflow: hidden; }
+.partner-card-header { background: linear-gradient(135deg, #152c47, #2563a8); color: #fff; padding: 14px 18px; }
+.partner-card-name  { font-size: 13px; font-weight: 700; }
+.partner-card-count { font-size: 11px; color: rgba(255,255,255,0.7); margin-top: 2px; }
+.partner-card-body  { padding: 12px 18px; }
+.partner-faculty-item { display: flex; align-items: flex-start; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--gray-100); font-size: 12px; }
+.partner-faculty-item:last-child { border-bottom: none; }
+.partner-faculty-dot  { width: 6px; height: 6px; border-radius: 50%; background: var(--mcgill-mid); flex-shrink: 0; margin-top: 4px; }
+.partner-faculty-info { flex: 1; }
+.partner-faculty-name { font-weight: 600; }
+.partner-faculty-act  { color: var(--gray-500); font-size: 11px; }
+
+/* ── Targets view ── */
+.targets-header { background: var(--white); border-radius: var(--radius); padding: 18px 22px; box-shadow: var(--shadow-sm); margin-bottom: 20px; display: flex; align-items: center; gap: 16px; }
+.targets-header .icon { font-size: 36px; }
+.targets-header h3 { font-size: 15px; font-weight: 800; color: var(--mcgill-dark); }
+.targets-header p  { font-size: 12px; color: var(--gray-500); margin-top: 3px; line-height: 1.5; }
+.target-section { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow-sm); overflow: hidden; margin-bottom: 20px; }
+.target-section-header { background: #1e3a5f; color: #fff; padding: 12px 20px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: space-between; }
+.target-section-body { padding: 20px; }
+.target-pillar-row { display: grid; grid-template-columns: 180px 1fr 1fr 1fr auto; gap: 12px; align-items: center; margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--gray-100); }
+.target-pillar-row:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+.target-pillar-name { font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+.target-input-wrap { display: flex; flex-direction: column; gap: 3px; }
+.target-input-wrap label { font-size: 10px; font-weight: 600; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.4px; }
+.target-input-wrap input { border: 1.5px solid var(--gray-200); border-radius: 6px; padding: 6px 10px; font-size: 13px; font-family: inherit; width: 90px; text-align: center; background: var(--gray-50); }
+.target-input-wrap input:focus { outline: none; border-color: var(--mcgill-mid); background: var(--white); }
+.target-actual { font-size: 12px; color: var(--gray-700); }
+.target-actual .n { font-size: 18px; font-weight: 800; }
+.target-save-row { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; }
+.btn-save-targets { background: #1e3a5f; color: #fff; border: none; padding: 10px 24px; border-radius: 7px; font-size: 13px; font-weight: 700; cursor: pointer; }
+.btn-save-targets:hover { opacity: 0.9; }
+.period-tabs { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+.period-tab { padding: 7px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; border: 2px solid var(--gray-200); color: var(--gray-700); background: var(--white); transition: all 0.15s; }
+.period-tab.active { background: #1e3a5f; color: #fff; border-color: #1e3a5f; }
+.period-tab:hover:not(.active) { border-color: var(--mcgill-mid); color: var(--mcgill-dark); }
+
+/* ── Compare view ── */
+.compare-selectors { display: grid; grid-template-columns: 1fr auto 1fr; gap: 16px; align-items: end; margin-bottom: 20px; }
+.compare-sel-card { background: var(--white); border-radius: var(--radius); padding: 16px 18px; box-shadow: var(--shadow-sm); }
+.compare-sel-card label { display: block; font-size: 11px; font-weight: 700; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; }
+.compare-sel-card select { width: 100%; border: 1.5px solid var(--gray-200); border-radius: 7px; padding: 8px 12px; font-size: 13px; font-family: inherit; background: var(--gray-50); }
+.compare-vs { font-size: 18px; font-weight: 800; color: var(--gray-500); text-align: center; padding-bottom: 8px; }
+.compare-results { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+.compare-col { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow-sm); overflow: hidden; }
+.compare-col-header { padding: 12px 18px; font-size: 13px; font-weight: 700; color: #fff; }
+.compare-col-header.a { background: #1e3a5f; }
+.compare-col-header.b { background: #2563a8; }
+.compare-col-body { padding: 16px 18px; }
+.compare-metric { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--gray-100); }
+.compare-metric:last-child { border-bottom: none; }
+.compare-metric .m-label { font-size: 12px; color: var(--gray-700); font-weight: 600; }
+.compare-metric .m-value { font-size: 18px; font-weight: 800; color: var(--gray-900); }
+.compare-delta-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--gray-100); font-size: 12px; }
+.compare-delta-row:last-child { border-bottom: none; }
+.delta-label { flex: 1; color: var(--gray-700); font-weight: 600; }
+.delta-a { width: 50px; text-align: center; font-weight: 800; }
+.delta-b { width: 50px; text-align: center; font-weight: 800; }
+.delta-indicator { width: 60px; text-align: center; font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 10px; }
+.delta-up   { background: #dcfce7; color: #15803d; }
+.delta-down { background: #fee2e2; color: #dc2626; }
+.delta-same { background: var(--gray-100); color: var(--gray-500); }
+.compare-chart-card { background: var(--white); border-radius: var(--radius); padding: 18px 22px; box-shadow: var(--shadow-sm); margin-bottom: 20px; }
+.compare-chart-card h4 { font-size: 13px; font-weight: 700; color: var(--mcgill-dark); margin-bottom: 14px; }
+.compare-empty { text-align: center; padding: 48px; color: var(--gray-500); font-style: italic; }
+
+/* ── Reports view ── */
+.reports-options { background: var(--white); border-radius: var(--radius); padding: 22px 24px; box-shadow: var(--shadow-sm); margin-bottom: 20px; }
+.reports-options h3 { font-size: 14px; font-weight: 800; color: var(--mcgill-dark); margin-bottom: 16px; }
+.report-type-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+.report-type-card { border: 2px solid var(--gray-200); border-radius: 10px; padding: 16px 14px; text-align: center; cursor: pointer; transition: all 0.15s; }
+.report-type-card:hover { border-color: var(--mcgill-mid); background: var(--mcgill-light); }
+.report-type-card.selected { border-color: #1e3a5f; background: #eef3fa; }
+.report-type-card .rt-icon { font-size: 28px; margin-bottom: 6px; }
+.report-type-card .rt-name { font-size: 13px; font-weight: 700; color: var(--mcgill-dark); }
+.report-type-card .rt-desc { font-size: 11px; color: var(--gray-500); margin-top: 3px; line-height: 1.4; }
+.report-period-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+.report-period-row label { font-size: 12px; font-weight: 700; color: var(--gray-700); }
+.report-period-row select { border: 1.5px solid var(--gray-200); border-radius: 7px; padding: 7px 12px; font-size: 13px; font-family: inherit; }
+.report-generate-btn { background: var(--mcgill-red); color: #fff; border: none; padding: 12px 28px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+.report-generate-btn:hover { opacity: 0.9; }
+.report-preview-list { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow-sm); overflow: hidden; }
+.report-preview-header { background: #1e3a5f; color: #fff; padding: 12px 20px; font-size: 12px; font-weight: 700; }
+.report-preview-item { display: flex; align-items: center; gap: 12px; padding: 12px 20px; border-bottom: 1px solid var(--gray-100); font-size: 12.5px; }
+.report-preview-item:last-child { border-bottom: none; }
+.report-preview-item .rp-icon { font-size: 20px; }
+.report-preview-item .rp-info { flex: 1; }
+.report-preview-item .rp-name { font-weight: 600; }
+.report-preview-item .rp-meta { font-size: 11px; color: var(--gray-500); margin-top: 1px; }
+.report-preview-item .rp-btn  { background: var(--mcgill-mid); color: #fff; border: none; padding: 5px 14px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; }
+
+/* ── Overall progress card ── */
+.overall-progress-card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow-sm); padding: 18px 20px; margin-bottom: 20px; }
+.overall-progress-card h4 { font-size: 13px; font-weight: 700; color: var(--mcgill-dark); margin-bottom: 14px; }
+.progress-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.progress-label { font-size: 12px; font-weight: 600; width: 100px; flex-shrink: 0; }
+.progress-outer { flex: 1; height: 10px; background: var(--gray-100); border-radius: 5px; overflow: hidden; }
+.progress-inner { height: 100%; border-radius: 5px; transition: width 0.6s ease; }
+.progress-pct { font-size: 12px; font-weight: 700; width: 36px; text-align: right; flex-shrink: 0; }
+
+/* ── Import view ── */
+.import-zone { border: 2px dashed var(--gray-200); border-radius: var(--radius); padding: 36px 24px; text-align: center; background: var(--white); cursor: pointer; transition: border-color 0.2s, background 0.2s; margin-bottom: 20px; }
+.import-zone:hover, .import-zone.drag-over { border-color: var(--mcgill-mid); background: var(--mcgill-light); }
+.import-zone .icon { font-size: 40px; margin-bottom: 10px; }
+.import-zone h4 { font-size: 15px; font-weight: 700; color: var(--mcgill-dark); margin-bottom: 6px; }
+.import-zone p  { font-size: 12.5px; color: var(--gray-500); line-height: 1.6; }
+.import-zone input[type="file"] { display: none; }
+.imported-list { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow-sm); margin-bottom: 20px; overflow: hidden; }
+.imported-list-header { background: #1e3a5f; color: #fff; padding: 10px 18px; font-size: 12px; font-weight: 700; }
+.imported-item { display: flex; align-items: center; gap: 12px; padding: 10px 18px; border-bottom: 1px solid var(--gray-100); font-size: 12.5px; }
+.imported-item:last-child { border-bottom: none; }
+.imported-item .act-count { font-size: 11px; background: var(--mcgill-light); color: var(--mcgill-mid); padding: 2px 8px; border-radius: 10px; font-weight: 700; margin-left: auto; }
+.imported-item .del-btn { cursor: pointer; color: #dc2626; font-size: 14px; opacity: 0.6; transition: opacity 0.15s; }
+.imported-item .del-btn:hover { opacity: 1; }
+.manual-form { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow-sm); overflow: hidden; }
+.manual-form-header { background: #1e3a5f; color: #fff; padding: 14px 20px; font-size: 13px; font-weight: 700; }
+.manual-form-body { padding: 20px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-field { display: flex; flex-direction: column; gap: 4px; }
+.form-field label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--gray-500); }
+.form-field input, .form-field select, .form-field textarea { border: 1.5px solid var(--gray-200); border-radius: 7px; padding: 8px 12px; font-size: 13px; font-family: inherit; background: var(--gray-50); color: var(--gray-900); }
+.form-field input:focus, .form-field select:focus, .form-field textarea:focus { outline: none; border-color: var(--mcgill-mid); background: var(--white); }
+.form-field textarea { resize: vertical; min-height: 70px; }
+.span-2 { grid-column: span 2; }
+.theme-checks { display: flex; gap: 12px; flex-wrap: wrap; }
+.theme-check { display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; }
+.theme-check input { accent-color: var(--mcgill-mid); width: 15px; height: 15px; }
+.form-actions { display: flex; gap: 10px; margin-top: 16px; }
+.btn-save   { background: #1e3a5f; color: #fff; border: none; padding: 10px 24px; border-radius: 7px; font-size: 13px; font-weight: 700; cursor: pointer; }
+.btn-save:hover { opacity: 0.9; }
+.btn-cancel { background: var(--gray-100); color: var(--gray-700); border: none; padding: 10px 20px; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; }
+
+/* ── Toast / Empty ── */
+#toast { position: fixed; bottom: 24px; right: 24px; background: #1e3a5f; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; box-shadow: 0 6px 20px rgba(0,0,0,0.15); opacity: 0; transform: translateY(10px); transition: opacity 0.3s, transform 0.3s; pointer-events: none; z-index: 9999; max-width: 320px; border-left: 4px solid #60a5fa; }
+#toast.show { opacity: 1; transform: translateY(0); }
+.empty-state { text-align: center; padding: 48px 24px; background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow-sm); }
+.empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+.empty-state h4 { font-size: 16px; font-weight: 700; color: var(--mcgill-dark); margin-bottom: 6px; }
+.empty-state p  { font-size: 13px; color: var(--gray-500); line-height: 1.6; }
+@media print { .sidebar, .topbar-actions, .filter-bar { display: none !important; } .main { margin-left: 0; } body { background: white; } }
+</style>
+</head>
+<body>
+<!-- ── Sidebar ── -->
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <div class="logo">🤝</div>
+    <div class="name">Nkabom Collaborative</div>
+    <div class="sub">Academic Lead Dashboard</div>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-section-label">Monitoring</div>
+    <div class="nav-item active" onclick="showView('dashboard')" id="nav-dashboard"><span class="icon">📊</span> Overview</div>
+    <div class="nav-item" onclick="showView('activities')" id="nav-activities"><span class="icon">🗺️</span> Activity Map</div>
+    <div class="nav-section-label">Breakdown</div>
+    <div class="nav-item" onclick="showView('faculty')" id="nav-faculty"><span class="icon">🏛️</span> By Faculty</div>
+    <div class="nav-item" onclick="showView('pillars')" id="nav-pillars"><span class="icon">🎯</span> By Pillar</div>
+    <div class="nav-item" onclick="showView('partners')" id="nav-partners"><span class="icon">🤝</span> By Partner</div>
+    <div class="nav-section-label">Planning &amp; Reports</div>
+    <div class="nav-item" onclick="showView('targets')" id="nav-targets"><span class="icon">📈</span> Targets</div>
+    <div class="nav-item" onclick="showView('compare')" id="nav-compare"><span class="icon">⚖️</span> Compare Periods</div>
+    <div class="nav-item" onclick="showView('reports')" id="nav-reports"><span class="icon">📄</span> Reports</div>
+    <div class="nav-section-label">Data</div>
+    <div class="nav-item" onclick="showView('import')" id="nav-import"><span class="icon">➕</span> Add / Import</div>
+  </div>
+  <div class="sidebar-footer">McGill University<br>Academic Lead Office<br>Ghana–Canada Partnership</div>
+</nav>
+
+<!-- ── Main ── -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title">Faculty Activity Map</div>
+    <div class="topbar-period">
+      <label>📅 Period:</label>
+      <select id="period-filter" onchange="onPeriodChange()">
+        <option value="all">All Time</option>
+      </select>
+    </div>
+    <div class="topbar-meta">
+      <span class="pill" id="topbar-submissions">0 submissions</span>
+      <span class="pill" id="topbar-activities">0 activities</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn-sm btn-outline-sm" onclick="window.print()">🖨️ Print</button>
+      <button class="btn-sm btn-primary-sm" onclick="showView('import')">＋ Add Data</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ══ OVERVIEW ══ -->
+    <div class="view active" id="view-dashboard">
+      <div class="stat-grid">
+        <div class="stat-card red"   data-icon="👤"><div class="label">Faculty Submissions</div><div class="value" id="stat-submissions">0</div><div class="sub" id="stat-submissions-sub">of 4 faculties</div></div>
+        <div class="stat-card green" data-icon="✅"><div class="label">Activities Completed</div><div class="value" id="stat-completed">0</div><div class="sub" id="stat-completed-sub">of 0 total</div></div>
+        <div class="stat-card amber" data-icon="⚡"><div class="label">Activities Ongoing</div><div class="value" id="stat-ongoing">0</div><div class="sub" id="stat-ongoing-sub">in progress</div></div>
+        <div class="stat-card navy"  data-icon="🏛️"><div class="label">Partners Engaged</div><div class="value" id="stat-partners">0</div><div class="sub">Ghanaian institutions</div></div>
+      </div>
+      <div class="overall-progress-card">
+        <h4>Overall Project Progress</h4>
+        <div class="progress-row"><div class="progress-label" style="color:#15803d">✅ Completed</div><div class="progress-outer"><div class="progress-inner" id="prog-completed" style="width:0%;background:#15803d"></div></div><div class="progress-pct" id="pct-completed" style="color:#15803d">0%</div></div>
+        <div class="progress-row"><div class="progress-label" style="color:var(--ent-color)">⚡ Ongoing</div><div class="progress-outer"><div class="progress-inner" id="prog-ongoing" style="width:0%;background:var(--ent-color)"></div></div><div class="progress-pct" id="pct-ongoing" style="color:var(--ent-color)">0%</div></div>
+        <div class="progress-row"><div class="progress-label" style="color:var(--mcgill-dark)">🗓️ Planned</div><div class="progress-outer"><div class="progress-inner" id="prog-planned" style="width:0%;background:var(--mcgill-dark)"></div></div><div class="progress-pct" id="pct-planned" style="color:var(--mcgill-dark)">0%</div></div>
+      </div>
+      <div class="section-head"><h3>Progress by Strategic Pillar</h3><span class="hint">Activities mapped to each pillar</span></div>
+      <div class="pillar-progress-grid">
+        <div class="pillar-card edu">
+          <div class="pillar-name">📚 Education</div>
+          <div style="font-size:11px;color:var(--gray-500);margin-bottom:6px">Building Skills and Knowledge</div>
+          <div class="pillar-counts">
+            <div class="pillar-count-item done"> <div class="num" id="edu-done">0</div><div class="lbl">Done</div></div>
+            <div class="pillar-count-item going"><div class="num" id="edu-going">0</div><div class="lbl">Active</div></div>
+            <div class="pillar-count-item plan"> <div class="num" id="edu-plan">0</div><div class="lbl">Planned</div></div>
+          </div>
+          <div class="pillar-bar-outer"><div class="pillar-bar-inner" id="edu-bar" style="background:var(--edu-color);width:0%"></div><div class="pillar-target-line" id="edu-target-line" style="left:0%;display:none"></div></div>
+          <div style="font-size:10px;color:var(--gray-500);margin-top:4px" id="edu-pct">0% complete</div>
+        </div>
+        <div class="pillar-card acc">
+          <div class="pillar-name">🌱 Access &amp; Success</div>
+          <div style="font-size:11px;color:var(--gray-500);margin-bottom:6px">Expanding Opportunities</div>
+          <div class="pillar-counts">
+            <div class="pillar-count-item done"> <div class="num" id="acc-done">0</div><div class="lbl">Done</div></div>
+            <div class="pillar-count-item going"><div class="num" id="acc-going">0</div><div class="lbl">Active</div></div>
+            <div class="pillar-count-item plan"> <div class="num" id="acc-plan">0</div><div class="lbl">Planned</div></div>
+          </div>
+          <div class="pillar-bar-outer"><div class="pillar-bar-inner" id="acc-bar" style="background:var(--acc-color);width:0%"></div><div class="pillar-target-line" id="acc-target-line" style="left:0%;display:none"></div></div>
+          <div style="font-size:10px;color:var(--gray-500);margin-top:4px" id="acc-pct">0% complete</div>
+        </div>
+        <div class="pillar-card ent">
+          <div class="pillar-name">🚀 Entrepreneurship</div>
+          <div style="font-size:11px;color:var(--gray-500);margin-bottom:6px">Driving Innovation and Impact</div>
+          <div class="pillar-counts">
+            <div class="pillar-count-item done"> <div class="num" id="ent-done">0</div><div class="lbl">Done</div></div>
+            <div class="pillar-count-item going"><div class="num" id="ent-going">0</div><div class="lbl">Active</div></div>
+            <div class="pillar-count-item plan"> <div class="num" id="ent-plan">0</div><div class="lbl">Planned</div></div>
+          </div>
+          <div class="pillar-bar-outer"><div class="pillar-bar-inner" id="ent-bar" style="background:var(--ent-color);width:0%"></div><div class="pillar-target-line" id="ent-target-line" style="left:0%;display:none"></div></div>
+          <div style="font-size:10px;color:var(--gray-500);margin-top:4px" id="ent-pct">0% complete</div>
+        </div>
+      </div>
+      <div class="charts-grid">
+        <div class="chart-card"><h4>Activity Distribution by Pillar</h4><div class="chart-container"><canvas id="chart-pillar"></canvas></div></div>
+        <div class="chart-card"><h4>Status Breakdown by Pillar</h4><div class="chart-container"><canvas id="chart-status"></canvas></div></div>
+      </div>
+      <div class="section-head"><h3>Faculty Engagement Tracker</h3><span class="hint">Submission status by faculty</span></div>
+      <div class="faculty-strip" id="faculty-strip"></div>
+    </div><!-- /overview -->
+
+    <!-- ══ ACTIVITY MAP ══ -->
+    <div class="view" id="view-activities">
+      <div class="section-head" style="margin-bottom:16px"><h3>All Activities</h3><button class="btn-sm btn-primary-sm" onclick="exportCSV()">⬇ Export CSV</button></div>
+      <div class="filter-bar">
+        <input type="text" id="search-input" placeholder="🔍 Search activities, faculty, partners…" oninput="renderActivityTable()" />
+        <select id="filter-pillar" onchange="renderActivityTable()">
+          <option value="">All Pillars</option>
+          <option value="Education">Education</option>
+          <option value="Access and Success">Access &amp; Success</option>
+          <option value="Entrepreneurship">Entrepreneurship</option>
+        </select>
+        <select id="filter-status" onchange="renderActivityTable()">
+          <option value="">All Statuses</option>
+          <option value="Completed">Completed</option>
+          <option value="Ongoing">Ongoing</option>
+          <option value="Planned">Planned</option>
+        </select>
+        <select id="filter-faculty" onchange="renderActivityTable()">
+          <option value="">All Faculties</option>
+          <option value="Agricultural and Environmental Sciences (AES)">AES</option>
+          <option value="School of Continuing Education">SCS</option>
+          <option value="School of Population and Global Health (SPGH)">SPGH</option>
+          <option value="Sustainability Growth Initiative (SGI)">SGI</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Activity</th><th>Faculty Member</th><th>Faculty</th><th>Pillar(s)</th><th>Status</th><th>Partner Institution</th><th>Contact</th><th>Dates</th></tr></thead>
+          <tbody id="activity-table-body"></tbody>
+        </table>
+      </div>
+    </div><!-- /activities -->
+
+    <!-- ══ BY FACULTY ══ -->
+    <div class="view" id="view-faculty">
+      <div class="section-head" style="margin-bottom:16px"><h3>Activities by Faculty</h3><span class="hint" id="faculty-count-hint"></span></div>
+      <div id="faculty-cards-grid"></div>
+    </div>
+
+    <!-- ══ BY PILLAR ══ -->
+    <div class="view" id="view-pillars">
+      <div class="section-head" style="margin-bottom:16px"><h3>Activities by Strategic Pillar</h3><span class="hint" id="pillars-count-hint"></span></div>
+      <div class="pillar-full-grid" id="pillar-full-grid"></div>
+    </div>
+
+    <!-- ══ BY PARTNER ══ -->
+    <div class="view" id="view-partners">
+      <div class="section-head" style="margin-bottom:16px"><h3>Partner Institution Engagement</h3><span class="hint" id="partner-count-hint"></span></div>
+      <div class="partner-grid-view" id="partner-grid-view"></div>
+    </div>
+
+    <!-- ══ TARGETS ══ -->
+    <div class="view" id="view-targets">
+      <div class="targets-header">
+        <div class="icon">📈</div>
+        <div>
+          <h3>Target Setting &amp; Progress Visualisation</h3>
+          <p>Set activity targets per pillar for overall project, each year, and each quarter. The red line on progress bars shows your target — adjust and save at any time.</p>
+        </div>
+      </div>
+      <div class="period-tabs" id="target-period-tabs"></div>
+      <div id="target-period-content"></div>
+    </div>
+
+    <!-- ══ COMPARE PERIODS ══ -->
+    <div class="view" id="view-compare">
+      <div class="section-head" style="margin-bottom:16px"><h3>Period Comparison</h3><span class="hint">Select two periods to compare side-by-side</span></div>
+      <div class="compare-selectors">
+        <div class="compare-sel-card">
+          <label>Period A</label>
+          <select id="compare-period-a" onchange="runComparison()"><option value="">— Select Period —</option></select>
+        </div>
+        <div class="compare-vs">VS</div>
+        <div class="compare-sel-card">
+          <label>Period B</label>
+          <select id="compare-period-b" onchange="runComparison()"><option value="">— Select Period —</option></select>
+        </div>
+      </div>
+      <div id="compare-output"><div class="compare-empty">Select two periods above to compare performance.</div></div>
+    </div>
+
+    <!-- ══ REPORTS ══ -->
+    <div class="view" id="view-reports">
+      <div class="reports-options">
+        <h3>Generate Progress Reports</h3>
+        <div class="report-type-grid">
+          <div class="report-type-card selected" onclick="selectReportType('monthly',this)"><div class="rt-icon">📅</div><div class="rt-name">Monthly</div><div class="rt-desc">Single month summary for internal tracking</div></div>
+          <div class="report-type-card" onclick="selectReportType('quarterly',this)"><div class="rt-icon">📆</div><div class="rt-name">Quarterly</div><div class="rt-desc">Quarter progress for oversight committee</div></div>
+          <div class="report-type-card" onclick="selectReportType('annual',this)"><div class="rt-icon">🗓️</div><div class="rt-name">Annual</div><div class="rt-desc">Full year report for Provost review</div></div>
+          <div class="report-type-card" onclick="selectReportType('overall',this)"><div class="rt-icon">🌐</div><div class="rt-name">Overall</div><div class="rt-desc">Full project report — all periods</div></div>
+        </div>
+        <div class="report-period-row">
+          <label>Report Period:</label>
+          <select id="report-period-select"><option value="all">All Time</option></select>
+        </div>
+        <button class="report-generate-btn" onclick="generateReport()">📄 Generate Report</button>
+      </div>
+      <div class="report-preview-list" id="report-history" style="display:none">
+        <div class="report-preview-header">Recently Generated Reports</div>
+        <div id="report-history-items"></div>
+      </div>
+    </div>
+
+    <!-- ══ ADD / IMPORT ══ -->
+    <div class="view" id="view-import">
+      <div class="section-head" style="margin-bottom:14px"><h3>Import Faculty Submissions</h3><span class="hint">Import JSON files from the Faculty Activity Mapping Form</span></div>
+      <div class="import-zone" id="import-zone" onclick="document.getElementById('file-input').click()" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropFiles(event)">
+        <input type="file" id="file-input" accept=".json" multiple onchange="handleFiles(this.files)" />
+        <div class="icon">📂</div>
+        <h4>Click to browse or drag &amp; drop JSON files here</h4>
+        <p>Import one or more JSON files saved from the Faculty Activity Mapping Form.<br>Duplicate submissions (same name + date) will be skipped automatically.</p>
+      </div>
+      <div class="imported-list" id="imported-list-wrap" style="display:none">
+        <div class="imported-list-header">Loaded Submissions</div>
+        <div id="imported-list-items"></div>
+      </div>
+      <div class="section-head" style="margin:20px 0 14px"><h3>Add Activity Manually</h3><span class="hint">Enter data received via email or other means</span></div>
+      <div class="manual-form">
+        <div class="manual-form-header">New Activity Entry</div>
+        <div class="manual-form-body">
+          <div class="form-grid">
+            <div class="form-field"><label>Faculty Member Name *</label><input type="text" id="m-name" placeholder="Full name" /></div>
+            <div class="form-field"><label>Email</label><input type="email" id="m-email" placeholder="mcgill email" /></div>
+            <div class="form-field"><label>Faculty *</label><select id="m-faculty"><option value="">— Select —</option><option>Agricultural and Environmental Sciences (AES)</option><option>School of Continuing Education</option><option>School of Population and Global Health (SPGH)</option><option>Sustainability Growth Initiative (SGI)</option></select></div>
+            <div class="form-field"><label>Department / Unit</label><input type="text" id="m-dept" placeholder="Department" /></div>
+            <div class="form-field span-2"><label>Activity Title *</label><input type="text" id="m-title" placeholder="Activity title" /></div>
+            <div class="form-field span-2"><label>Pillar(s) *</label><div class="theme-checks"><label class="theme-check"><input type="checkbox" id="m-edu" value="Education" /> Education</label><label class="theme-check"><input type="checkbox" id="m-acc" value="Access and Success" /> Access &amp; Success</label><label class="theme-check"><input type="checkbox" id="m-ent" value="Entrepreneurship" /> Entrepreneurship</label></div></div>
+            <div class="form-field"><label>Status *</label><select id="m-status"><option value="">— Select —</option><option>Completed</option><option>Ongoing</option><option>Planned</option></select></div>
+            <div class="form-field"><label>Partner Institution</label><select id="m-partner"><option value="">— None —</option><option>Association of Ghana Industries</option><option>Ashesi University</option><option>Koforidua Technical University</option><option>Kwame Nkrumah University of Science and Technology (KNUST)</option><option>University of Environment and Sustainable Development</option><option>University of Ghana</option><option>University of Health and Allied Sciences (UHAS)</option><option>Other</option></select></div>
+            <div class="form-field"><label>Contact Name</label><input type="text" id="m-contact-name" placeholder="Partner contact name" /></div>
+            <div class="form-field"><label>Contact Email</label><input type="email" id="m-contact-email" placeholder="contact@institution.edu.gh" /></div>
+            <div class="form-field"><label>Start Date</label><input type="date" id="m-start" /></div>
+            <div class="form-field"><label>End Date</label><input type="date" id="m-end" /></div>
+            <div class="form-field span-2"><label>Description</label><textarea id="m-desc" placeholder="Brief description of the activity…"></textarea></div>
+            <div class="form-field span-2"><label>Key Outputs / Deliverables</label><input type="text" id="m-outputs" placeholder="e.g. Report, workshop, curriculum module…" /></div>
+          </div>
+          <div class="form-actions"><button class="btn-save" onclick="saveManualEntry()">✅ Save Activity</button><button class="btn-cancel" onclick="clearManualForm()">Clear</button></div>
+        </div>
+      </div>
+    </div><!-- /import -->
+
+  </div><!-- /content -->
+</div><!-- /main -->
+<div id="toast"></div>
+<script>
+/* ══════════════════════════════════════════
+   DATA STORES
+══════════════════════════════════════════ */
+const STORE_KEY   = 'nkabom_activity_map_v1';
+const TARGETS_KEY = 'nkabom_targets_v1';
+let submissions = [];
+let targets = { overall:{}, annual:{}, quarterly:{} };
+let reportHistory = [];
+const REPORT_HIST_KEY = 'nkabom_report_history_v1';
+
+function loadStore() {
+  try { const r = localStorage.getItem(STORE_KEY); submissions = r ? JSON.parse(r) : []; } catch(e) { submissions = []; }
+  try { const t = localStorage.getItem(TARGETS_KEY); if(t) targets = JSON.parse(t); } catch(e) {}
+  try { const h = localStorage.getItem(REPORT_HIST_KEY); if(h) reportHistory = JSON.parse(h); } catch(e) {}
+}
+function saveStore()   { localStorage.setItem(STORE_KEY,   JSON.stringify(submissions)); }
+function saveTargets() { localStorage.setItem(TARGETS_KEY, JSON.stringify(targets)); }
+function saveReportHistory() { localStorage.setItem(REPORT_HIST_KEY, JSON.stringify(reportHistory.slice(0,20))); }
+
+/* ══════════════════════════════════════════
+   SAMPLE DATA
+══════════════════════════════════════════ */
+const SAMPLE = [
+  { id:'sub-001', imported_at:'2026-04-28T10:00:00Z',
+    respondent:{ full_name:'Dr. Sarah Osei', email:'sarah.osei@mcgill.ca', faculty:'Agricultural and Environmental Sciences (AES)', department:'Bioresource Engineering', position:'Associate Professor', submission_date:'2026-04-28' },
+    activities:[
+      { title:'Climate-Smart Agriculture Curriculum Module', themes:['Education'], status:'Ongoing', description:'Co-developing curriculum on climate-smart agriculture with KNUST faculty.', start_date:'2026-01-15', end_date:'2026-08-30', partner_institution:'Kwame Nkrumah University of Science and Technology (KNUST)', contact_name:'Prof. Kweku Mensah', contact_email:'k.mensah@knust.edu.gh', outputs:'Joint curriculum module, teaching resource pack' },
+      { title:'Youth Agri-Food Entrepreneurship Workshop', themes:['Entrepreneurship'], status:'Completed', description:'Three-day workshop on agri-food business development for youth.', start_date:'2026-02-10', end_date:'2026-02-12', partner_institution:'Association of Ghana Industries', contact_name:'Ms. Ama Boateng', contact_email:'a.boateng@agi.com.gh', outputs:'Workshop report, 45 youth participants trained' }
+    ], additional:{ resources_needed:'Travel funds for field visit to KNUST', challenges_barriers:'Time zone differences affect scheduling', outcomes_achievements:'Curriculum draft complete; workshop reached 45 youth', collaboration_opportunities:'Potential SPGH collaboration on nutrition component' }
+  },
+  { id:'sub-002', imported_at:'2026-05-02T14:00:00Z',
+    respondent:{ full_name:'Prof. James Asante', email:'james.asante@mcgill.ca', faculty:'School of Population and Global Health (SPGH)', department:'Global and Community Health', position:'Professor', submission_date:'2026-05-02' },
+    activities:[
+      { title:'Nutrition-Sensitive Food Systems Research', themes:['Education','Access and Success'], status:'Ongoing', description:'Joint research on improving nutritional outcomes in rural Ghana.', start_date:'2026-03-01', end_date:'2026-12-31', partner_institution:'University of Health and Allied Sciences (UHAS)', contact_name:'Dr. Abena Frimpong', contact_email:'a.frimpong@uhas.edu.gh', outputs:'Research paper, policy brief' },
+      { title:'Scholarship Program for Women in Agri-food', themes:['Access and Success'], status:'Planned', description:'Establishing scholarships targeting women from underserved communities.', start_date:'2026-09-01', end_date:'2027-06-30', partner_institution:'University of Ghana', contact_name:'Dr. Efua Asimah', contact_email:'e.asimah@ug.edu.gh', outputs:'Scholarship framework, 20 scholarships' }
+    ], additional:{ resources_needed:'Research assistant and data collection tools', outcomes_achievements:'Research protocol approved by ethics board', collaboration_opportunities:'AES faculty for agronomic expertise' }
+  },
+  { id:'sub-003', imported_at:'2026-05-08T09:00:00Z',
+    respondent:{ full_name:'Dr. Marie Dupont', email:'marie.dupont@mcgill.ca', faculty:'School of Continuing Education', department:'Professional Development Programs', position:'Senior Lecturer', submission_date:'2026-05-08' },
+    activities:[
+      { title:'Online Certificate in Agri-food Business Management', themes:['Education','Entrepreneurship'], status:'Ongoing', description:'Online professional certificate accessible to Ghanaian agri-food professionals.', start_date:'2026-02-01', end_date:'2026-11-30', partner_institution:'Koforidua Technical University', contact_name:'Mr. Kofi Amoah', contact_email:'k.amoah@ktu.edu.gh', outputs:'Online certificate program, 100+ learners' },
+      { title:'Business Incubation for Youth Entrepreneurs', themes:['Entrepreneurship'], status:'Planned', description:'Business incubation and mentorship for youth-led agri-food enterprises.', start_date:'2026-10-01', end_date:'2027-03-31', partner_institution:'Ashesi University', contact_name:'Dr. Nana Yaw Ofori', contact_email:'n.ofori@ashesi.edu.gh', outputs:'15 enterprises supported' }
+    ], additional:{ resources_needed:'Platform licensing for online modules', challenges_barriers:'Internet connectivity limitations in rural Ghana', outcomes_achievements:'60 learners enrolled in certificate pilot', collaboration_opportunities:'Link with AES for technical agronomy content' }
+  },
+  { id:'sub-004', imported_at:'2026-05-12T11:00:00Z',
+    respondent:{ full_name:'Dr. Kwame Poku', email:'kwame.poku@mcgill.ca', faculty:'Sustainability Growth Initiative (SGI)', department:'Sustainable Development', position:'Research Associate', submission_date:'2026-05-12' },
+    activities:[
+      { title:'Agri-Food Value Chain Analysis – Northern Ghana', themes:['Education','Entrepreneurship'], status:'Completed', description:'Analysis of agri-food value chains in Northern Ghana identifying youth employment opportunities.', start_date:'2025-11-01', end_date:'2026-04-30', partner_institution:'University of Environment and Sustainable Development', contact_name:'Prof. Akosua Mensah', contact_email:'a.mensah@uesd.edu.gh', outputs:'Value chain report, policy recommendations, dataset' },
+      { title:'Green Entrepreneurship Training Program', themes:['Access and Success','Entrepreneurship'], status:'Ongoing', description:'Training on sustainable and green entrepreneurship for young women in Ghana.', start_date:'2026-04-01', end_date:'2026-09-30', partner_institution:'University of Ghana', contact_name:'Dr. Efua Asimah', contact_email:'e.asimah@ug.edu.gh', outputs:'Training materials, 30 participants' }
+    ], additional:{ resources_needed:'Field research budget for second phase', outcomes_achievements:'Report submitted to Ministry of Food and Agriculture', challenges_barriers:'Coordination with multiple government agencies is time-intensive' }
+  }
+];
+
+const PILLARS = ['Education','Access and Success','Entrepreneurship'];
+const PILLAR_META = {
+  'Education':          { cls:'edu', icon:'📚', color:'var(--edu-color)', desc:'Building agricultural skills and academic knowledge to strengthen the capacity of students, faculty, and agri-food professionals across Ghana and Canada.' },
+  'Access and Success': { cls:'acc', icon:'🌱', color:'var(--acc-color)', desc:'Expanding access to higher education and professional opportunities for underserved communities, with a focus on women and rural youth in the agri-food sector.' },
+  'Entrepreneurship':   { cls:'ent', icon:'🚀', color:'var(--ent-color)', desc:'Driving innovation and enterprise development in the agri-food value chain by supporting youth-led businesses, incubation programs, and market linkages.' }
+};
+const FACULTIES = ['Agricultural and Environmental Sciences (AES)','School of Continuing Education','School of Population and Global Health (SPGH)','Sustainability Growth Initiative (SGI)'];
+const FAC_SHORT  = { 'Agricultural and Environmental Sciences (AES)':'AES', 'School of Continuing Education':'SCS', 'School of Population and Global Health (SPGH)':'SPGH', 'Sustainability Growth Initiative (SGI)':'SGI' };
+
+/* ══════════════════════════════════════════
+   PERIOD HELPERS
+══════════════════════════════════════════ */
+let currentPeriod = 'all';
+
+function getActDate(a) {
+  return a.start_date || (a._sub && a._sub.respondent && a._sub.respondent.submission_date) || '';
+}
+
+function parsePeriod(dateStr) {
+  if (!dateStr) return null;
+  const d = new Date(dateStr + 'T12:00:00');
+  if (isNaN(d)) return null;
+  const y = d.getFullYear(), m = d.getMonth();
+  const q = Math.floor(m/3)+1;
+  return { yearStr: String(y), quarterStr: y+'-Q'+q, monthStr: y+'-'+String(m+1).padStart(2,'0') };
+}
+
+function filterByPeriod(acts, period) {
+  if (!period || period === 'all') return acts;
+  return acts.filter(a => {
+    const p = parsePeriod(getActDate(a));
+    if (!p) return false;
+    if (period.match(/^\d{4}-Q\d$/))          return p.quarterStr === period;
+    if (period.match(/^\d{4}-\d{2}$/))        return p.monthStr   === period;
+    if (period.match(/^\d{4}$/)  )            return p.yearStr    === period;
+    return true;
+  });
+}
+
+function allPeriodOptions() {
+  const acts = allActivities();
+  const years = new Set(), quarters = new Set(), months = new Set();
+  acts.forEach(a => {
+    const p = parsePeriod(getActDate(a));
+    if (p) { years.add(p.yearStr); quarters.add(p.quarterStr); months.add(p.monthStr); }
+  });
+  const opts = [{ value:'all', label:'📅 All Time' }];
+  [...years].sort().forEach(y => {
+    opts.push({ value:y, label:'📆 '+y+' (Full Year)' });
+    ['Q1','Q2','Q3','Q4'].forEach(q => {
+      const qs = y+'-'+q;
+      if (quarters.has(qs)) opts.push({ value:qs, label:'  '+q+' '+y });
+    });
+  });
+  return opts;
+}
+
+function buildPeriodFilter() {
+  const sel = document.getElementById('period-filter');
+  const prev = sel.value || 'all';
+  const opts = allPeriodOptions();
+  sel.innerHTML = opts.map(o => `<option value="${o.value}">${o.label}</option>`).join('');
+  sel.value = opts.find(o=>o.value===prev) ? prev : 'all';
+  currentPeriod = sel.value;
+}
+
+function onPeriodChange() {
+  currentPeriod = document.getElementById('period-filter').value;
+  const activeView = document.querySelector('.view.active');
+  if (!activeView) return;
+  const name = activeView.id.replace('view-','');
+  if (name === 'dashboard')  renderDashboard();
+  if (name === 'activities') renderActivityTable();
+  if (name === 'faculty')    renderFacultyView();
+  if (name === 'pillars')    renderPillarView();
+  if (name === 'partners')   renderPartnerView();
+  if (name === 'targets')    renderTargetView();
+  updateTopbarCounts();
+}
+
+function periodLabel(v) {
+  if (!v || v === 'all') return 'All Time';
+  if (v.match(/^\d{4}$/))     return 'Year '+v;
+  if (v.match(/^\d{4}-Q\d$/)) { const [y,q]=v.split('-'); return q+' '+y; }
+  if (v.match(/^\d{4}-\d{2}$/)) {
+    const [y,m] = v.split('-');
+    const mn = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(m)-1];
+    return mn+' '+y;
+  }
+  return v;
+}
+
+/* ══════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════ */
+function allActivities() {
+  return submissions.flatMap(s => s.activities.map(a => ({ ...a, _sub: s })));
+}
+function filteredActs() { return filterByPeriod(allActivities(), currentPeriod); }
+function themeClass(t)  { return t==='Education'?'edu':t==='Access and Success'?'acc':t==='Entrepreneurship'?'ent':''; }
+function statusClass(s) { return s.toLowerCase(); }
+function initials(name) { return name.split(' ').filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase(); }
+function getTarget(pillar, periodKey) {
+  if (!periodKey || periodKey==='all') return targets.overall && targets.overall[pillar] ? Number(targets.overall[pillar]) : 0;
+  if (periodKey.match(/^\d{4}$/)) return targets.annual && targets.annual[periodKey] && targets.annual[periodKey][pillar] ? Number(targets.annual[periodKey][pillar]) : 0;
+  if (periodKey.match(/^\d{4}-Q\d$/)) return targets.quarterly && targets.quarterly[periodKey] && targets.quarterly[periodKey][pillar] ? Number(targets.quarterly[periodKey][pillar]) : 0;
+  return 0;
+}
+
+/* ══════════════════════════════════════════
+   NAVIGATION
+══════════════════════════════════════════ */
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const vEl = document.getElementById('view-'+name);
+  const nEl = document.getElementById('nav-'+name);
+  if (vEl) vEl.classList.add('active');
+  if (nEl) nEl.classList.add('active');
+  if (name==='dashboard')  renderDashboard();
+  if (name==='activities') renderActivityTable();
+  if (name==='faculty')    renderFacultyView();
+  if (name==='pillars')    renderPillarView();
+  if (name==='partners')   renderPartnerView();
+  if (name==='targets')    renderTargetView();
+  if (name==='compare')    renderCompareView();
+  if (name==='reports')    renderReportView();
+  if (name==='import')     renderImportList();
+}
+
+function updateTopbarCounts() {
+  const acts = filteredActs();
+  document.getElementById('topbar-submissions').textContent = submissions.length + ' submission' + (submissions.length!==1?'s':'');
+  document.getElementById('topbar-activities').textContent  = acts.length + ' activit' + (acts.length!==1?'ies':'y') + (currentPeriod!=='all'?' (filtered)':'');
+}
+
+/* ══════════════════════════════════════════
+   DASHBOARD
+══════════════════════════════════════════ */
+let pillarChart = null, statusChart = null;
+
+function renderDashboard() {
+  const acts = filteredActs();
+  const total     = acts.length;
+  const completed = acts.filter(a=>a.status==='Completed').length;
+  const ongoing   = acts.filter(a=>a.status==='Ongoing').length;
+  const planned   = acts.filter(a=>a.status==='Planned').length;
+  const partners  = new Set(acts.map(a=>a.partner_institution).filter(Boolean)).size;
+
+  updateTopbarCounts();
+  document.getElementById('stat-submissions').textContent = submissions.length;
+  document.getElementById('stat-completed').textContent   = completed;
+  document.getElementById('stat-completed-sub').textContent = 'of '+total+' total';
+  document.getElementById('stat-ongoing').textContent     = ongoing;
+  document.getElementById('stat-partners').textContent    = partners;
+
+  function setProg(id,pctId,n,tot) {
+    const pct = tot>0?Math.round(n/tot*100):0;
+    document.getElementById(id).style.width = pct+'%';
+    document.getElementById(pctId).textContent = pct+'%';
+  }
+  setProg('prog-completed','pct-completed',completed,total);
+  setProg('prog-ongoing',  'pct-ongoing',  ongoing,  total);
+  setProg('prog-planned',  'pct-planned',  planned,  total);
+
+  PILLARS.forEach((key,i) => {
+    const cls = ['edu','acc','ent'][i];
+    const pa  = acts.filter(a=>a.themes&&a.themes.includes(key));
+    const d=pa.filter(a=>a.status==='Completed').length, g=pa.filter(a=>a.status==='Ongoing').length, p=pa.filter(a=>a.status==='Planned').length;
+    const tot=pa.length, pct=tot>0?Math.round(d/tot*100):0;
+    document.getElementById(cls+'-done').textContent  = d;
+    document.getElementById(cls+'-going').textContent = g;
+    document.getElementById(cls+'-plan').textContent  = p;
+    document.getElementById(cls+'-bar').style.width   = pct+'%';
+    const tgt = getTarget(key, currentPeriod);
+    const tline = document.getElementById(cls+'-target-line');
+    if (tgt > 0) {
+      const tPct = Math.min(Math.round(d/tgt*100),100);
+      const tPos = Math.min(100, Math.round(d/tgt*100));
+      tline.style.display = 'block';
+      tline.style.left = Math.min(100, Math.round(tgt>0?(d/tgt*100):0))+'%';
+      // show actual target line at position representing target = 100%
+      tline.style.left = '100%'; // target is always at full bar end; bar shows actual/target
+      // Better: bar = actual/target (capped 100%), line at target position
+      document.getElementById(cls+'-bar').style.width = Math.min(100, tot>0?Math.round(d/tgt*100):0)+'%';
+      document.getElementById(cls+'-pct').textContent = d+'/'+tgt+' target ('+Math.round(tot>0?d/tgt*100:0)+'%)';
+      tline.style.left = '100%';
+    } else {
+      tline.style.display = 'none';
+      document.getElementById(cls+'-bar').style.width = pct+'%';
+      document.getElementById(cls+'-pct').textContent = pct+'% complete ('+tot+' activities)';
+    }
+  });
+
+  const strip = document.getElementById('faculty-strip');
+  strip.innerHTML = '';
+  FACULTIES.forEach(f => {
+    const subs = submissions.filter(s=>s.respondent.faculty===f);
+    const actCount = filterByPeriod(subs.flatMap(s=>s.activities.map(a=>({...a,_sub:s}))), currentPeriod).length;
+    const submitted = subs.length>0;
+    const card = document.createElement('div');
+    card.className = 'faculty-eng-card '+(submitted?'submitted':'pending');
+    card.innerHTML = `<div class="faculty-eng-name">${FAC_SHORT[f]||f}</div><div class="faculty-eng-status ${submitted?'submitted':'pending'}">${submitted?'✅ Submitted':'⏳ Pending'}</div><div class="faculty-eng-count">${actCount}</div><div class="faculty-eng-sub">activities</div>`;
+    strip.appendChild(card);
+  });
+
+  const eduActs=acts.filter(a=>a.themes&&a.themes.includes('Education')).length;
+  const accActs=acts.filter(a=>a.themes&&a.themes.includes('Access and Success')).length;
+  const entActs=acts.filter(a=>a.themes&&a.themes.includes('Entrepreneurship')).length;
+
+  if (pillarChart) pillarChart.destroy();
+  pillarChart = new Chart(document.getElementById('chart-pillar'),{
+    type:'doughnut',
+    data:{ labels:['Education','Access & Success','Entrepreneurship'], datasets:[{ data:[eduActs,accActs,entActs], backgroundColor:['#1e5fa8','#1a6b44','#a05c00'], borderWidth:2, borderColor:'#fff' }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ font:{size:11}, padding:12 } } } }
+  });
+
+  const compByP = PILLARS.map(p=>acts.filter(a=>a.themes&&a.themes.includes(p)&&a.status==='Completed').length);
+  const goByP   = PILLARS.map(p=>acts.filter(a=>a.themes&&a.themes.includes(p)&&a.status==='Ongoing').length);
+  const planByP = PILLARS.map(p=>acts.filter(a=>a.themes&&a.themes.includes(p)&&a.status==='Planned').length);
+
+  if (statusChart) statusChart.destroy();
+  statusChart = new Chart(document.getElementById('chart-status'),{
+    type:'bar',
+    data:{ labels:['Education','Access & Success','Entrepreneurship'],
+      datasets:[ {label:'Completed',data:compByP,backgroundColor:'#15803d'}, {label:'Ongoing',data:goByP,backgroundColor:'#a05c00'}, {label:'Planned',data:planByP,backgroundColor:'#1e3a5f'} ]
+    },
+    options:{ responsive:true, maintainAspectRatio:false, scales:{x:{stacked:true},y:{stacked:true,ticks:{stepSize:1}}}, plugins:{legend:{position:'bottom',labels:{font:{size:11},padding:10}}} }
+  });
+}
+
+/* ══════════════════════════════════════════
+   ACTIVITY TABLE
+══════════════════════════════════════════ */
+function renderActivityTable() {
+  const search  = (document.getElementById('search-input')?.value||'').toLowerCase();
+  const pillar  =  document.getElementById('filter-pillar')?.value||'';
+  const status  =  document.getElementById('filter-status')?.value||'';
+  const faculty =  document.getElementById('filter-faculty')?.value||'';
+  let acts = filteredActs();
+  if (search) acts = acts.filter(a=>[a.title,a._sub.respondent.full_name,a.partner_institution,a.description].join(' ').toLowerCase().includes(search));
+  if (pillar) acts = acts.filter(a=>a.themes&&a.themes.includes(pillar));
+  if (status) acts = acts.filter(a=>a.status===status);
+  if (faculty) acts = acts.filter(a=>a._sub.respondent.faculty===faculty);
+  const tbody = document.getElementById('activity-table-body');
+  if (acts.length===0) { tbody.innerHTML=`<tr><td colspan="8" class="no-data">No activities match the current filters.</td></tr>`; return; }
+  tbody.innerHTML = acts.map(a=>`
+    <tr>
+      <td><strong>${a.title}</strong>${a.outputs?`<br><span style="font-size:11px;color:var(--gray-500)">${a.outputs}</span>`:''}${a.collaborators&&a.collaborators.length>0?`<br><span style="font-size:10px;background:#d1fae5;color:#1a6b44;padding:1px 7px;border-radius:8px;font-weight:700">👥 +${a.collaborators.length} collaborator${a.collaborators.length>1?'s':''}</span>`:''}</td>
+      <td>${a._sub.respondent.full_name}<br><span style="font-size:11px;color:var(--gray-500)">${a._sub.respondent.position}</span></td>
+      <td style="font-size:11px">${FAC_SHORT[a._sub.respondent.faculty]||a._sub.respondent.faculty}</td>
+      <td>${(a.themes||[]).map(t=>`<span class="theme-tag ${themeClass(t)}">${t}</span>`).join('')}</td>
+      <td><span class="status-dot ${statusClass(a.status)}">${a.status}</span></td>
+      <td style="font-size:11px">${a.partner_institution||'—'}</td>
+      <td style="font-size:11px">${a.contact_name?`${a.contact_name}<br><a href="mailto:${a.contact_email}" style="color:#2563a8">${a.contact_email}</a>`:'—'}</td>
+      <td style="font-size:11px;white-space:nowrap">${a.start_date||''}${a.start_date&&a.end_date?' → ':''}${a.end_date||''}</td>
+    </tr>`).join('');
+}
+
+/* ══════════════════════════════════════════
+   FACULTY VIEW  (grouped by faculty unit)
+══════════════════════════════════════════ */
+const FAC_FULL_NAMES = {
+  'AES':       'Faculty of Agricultural and Environmental Sciences',
+  'SPGH':      'School of Population and Global Health',
+  'SCS':       'School of Continuing Education',
+  'SGI':       'Sustainability Growth Initiative'
+};
+const FAC_KEYS  = ['AES','SPGH','SCS','SGI'];
+const FAC_MATCH = {
+  'AES':  'Agricultural and Environmental Sciences (AES)',
+  'SPGH': 'School of Population and Global Health (SPGH)',
+  'SCS':  'School of Continuing Education',
+  'SGI':  'Sustainability Growth Initiative (SGI)'
+};
+
+function renderFacultyView() {
+  const grid = document.getElementById('faculty-cards-grid');
+  const acts = filteredActs();
+  const period = currentPeriod;
+
+  // Count faculties with data
+  const facWithData = FAC_KEYS.filter(fk => acts.some(a => a._sub.respondent.faculty === FAC_MATCH[fk]));
+  document.getElementById('faculty-count-hint').textContent =
+    facWithData.length + ' of 4 faculties with activities' + (period !== 'all' ? ' · ' + periodLabel(period) : '');
+
+  if (submissions.length === 0) {
+    grid.innerHTML = `<div class="empty-state"><div class="icon">🏛️</div><h4>No submissions yet</h4><p>Import JSON files or add activities manually.</p></div>`;
+    return;
+  }
+
+  grid.innerHTML = `<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:20px">` +
+    FAC_KEYS.map(fk => {
+      const facFullKey = FAC_MATCH[fk];
+      const facSubs    = submissions.filter(s => s.respondent.faculty === facFullKey);
+      const facActs    = filterByPeriod(facSubs.flatMap(s => s.activities.map(a => ({...a,_sub:s}))), period);
+      const done   = facActs.filter(a => a.status === 'Completed').length;
+      const go     = facActs.filter(a => a.status === 'Ongoing').length;
+      const plan   = facActs.filter(a => a.status === 'Planned').length;
+      const total  = facActs.length;
+      const compPct= total > 0 ? Math.round(done/total*100) : 0;
+      const members= new Set(facSubs.map(s => s.respondent.full_name));
+      const partners= new Set(facActs.map(a => a.partner_institution).filter(Boolean));
+      const pillarsSet = new Set(facActs.flatMap(a => a.themes || []));
+      const hasData = total > 0;
+
+      // Per-pillar mini counts
+      const pillarMini = PILLARS.map(key => {
+        const n = facActs.filter(a => a.themes && a.themes.includes(key)).length;
+        const cls = themeClass(key);
+        return n > 0 ? `<span class="theme-tag ${cls}" style="font-size:11px">${PILLAR_META[key].icon} ${key} (${n})</span>` : '';
+      }).filter(Boolean).join(' ');
+
+      // Individual member list (collapsed summary)
+      const memberList = facSubs.map(s => {
+        const mActs = filterByPeriod(s.activities.map(a=>({...a,_sub:s})), period);
+        const mDone = mActs.filter(a=>a.status==='Completed').length;
+        return `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--gray-100);font-size:12px">
+          <div style="width:28px;height:28px;border-radius:50%;background:var(--mcgill-mid);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0">${initials(s.respondent.full_name)}</div>
+          <div style="flex:1">
+            <div style="font-weight:600">${s.respondent.full_name}</div>
+            <div style="font-size:11px;color:var(--gray-500)">${s.respondent.position||''} · ${s.respondent.department||''}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:14px;font-weight:800;color:var(--mcgill-dark)">${mActs.length}</div>
+            <div style="font-size:10px;color:var(--gray-500)">activities</div>
+          </div>
+          <div style="text-align:right;width:48px">
+            <div style="font-size:14px;font-weight:800;color:#15803d">${mDone}</div>
+            <div style="font-size:10px;color:var(--gray-500)">done</div>
+          </div>
+        </div>`;
+      }).join('');
+
+      return `<div style="background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden;${!hasData?'opacity:0.6':''}">
+        <!-- Header -->
+        <div style="background:linear-gradient(135deg,#152c47,#1e3a5f);color:#fff;padding:16px 20px">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+            <div>
+              <div style="font-size:18px;font-weight:900;letter-spacing:-0.5px">${fk}</div>
+              <div style="font-size:11px;opacity:0.7;margin-top:2px">${FAC_FULL_NAMES[fk]}</div>
+            </div>
+            <div style="text-align:right;flex-shrink:0">
+              <div style="font-size:32px;font-weight:800;line-height:1">${total}</div>
+              <div style="font-size:10px;opacity:0.65">activities</div>
+            </div>
+          </div>
+          <!-- Progress bar -->
+          <div style="margin-top:12px">
+            <div style="display:flex;justify-content:space-between;font-size:10px;opacity:0.7;margin-bottom:4px">
+              <span>Completion rate</span><span>${compPct}%</span>
+            </div>
+            <div style="height:6px;background:rgba(255,255,255,0.2);border-radius:3px;overflow:hidden">
+              <div style="height:100%;width:${compPct}%;background:#4ade80;border-radius:3px;transition:width 0.6s ease"></div>
+            </div>
+          </div>
+        </div>
+        <!-- Stats row -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--gray-100)">
+          <div style="padding:12px;text-align:center;border-right:1px solid var(--gray-100)">
+            <div style="font-size:20px;font-weight:800;color:#15803d">${done}</div>
+            <div style="font-size:10px;color:var(--gray-500);text-transform:uppercase;letter-spacing:0.3px">Completed</div>
+          </div>
+          <div style="padding:12px;text-align:center;border-right:1px solid var(--gray-100)">
+            <div style="font-size:20px;font-weight:800;color:var(--ent-color)">${go}</div>
+            <div style="font-size:10px;color:var(--gray-500);text-transform:uppercase;letter-spacing:0.3px">Ongoing</div>
+          </div>
+          <div style="padding:12px;text-align:center;border-right:1px solid var(--gray-100)">
+            <div style="font-size:20px;font-weight:800;color:var(--mcgill-dark)">${plan}</div>
+            <div style="font-size:10px;color:var(--gray-500);text-transform:uppercase;letter-spacing:0.3px">Planned</div>
+          </div>
+          <div style="padding:12px;text-align:center">
+            <div style="font-size:20px;font-weight:800;color:var(--mcgill-mid)">${partners.size}</div>
+            <div style="font-size:10px;color:var(--gray-500);text-transform:uppercase;letter-spacing:0.3px">Partners</div>
+          </div>
+        </div>
+        <!-- Body -->
+        <div style="padding:16px 20px">
+          ${pillarMini ? `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">${pillarMini}</div>` : ''}
+          ${partners.size > 0 ? `<div style="font-size:11px;color:var(--gray-500);margin-bottom:12px"><strong style="color:var(--gray-700)">Partners:</strong> ${[...partners].join('; ')}</div>` : ''}
+          ${facSubs.length > 0 ? `
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--gray-500);margin-bottom:6px">Faculty Members (${members.size})</div>
+            ${memberList}` :
+            `<div style="font-size:12px;color:var(--gray-500);font-style:italic;padding:12px 0">${hasData ? '' : 'No submissions received yet.'}</div>`}
+        </div>
+        <!-- Dean report button -->
+        <div style="padding:10px 20px 14px;background:var(--gray-50);border-top:1px solid var(--gray-100)">
+          <button onclick="generateFacultyReport('${fk}')" style="background:#1e3a5f;color:#fff;border:none;padding:8px 18px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;width:100%">
+            📄 Generate ${fk} Dean Report
+          </button>
+        </div>
+      </div>`;
+    }).join('') + `</div>`;
+}
+
+/* ── Dean-level faculty report ── */
+function generateFacultyReport(fk) {
+  const facFullKey = FAC_MATCH[fk];
+  const facSubs    = submissions.filter(s => s.respondent.faculty === facFullKey);
+  const acts       = filterByPeriod(facSubs.flatMap(s => s.activities.map(a => ({...a,_sub:s}))), currentPeriod);
+  const done=acts.filter(a=>a.status==='Completed').length, go=acts.filter(a=>a.status==='Ongoing').length, plan=acts.filter(a=>a.status==='Planned').length;
+  const partners=new Set(acts.map(a=>a.partner_institution).filter(Boolean));
+  const today=new Date().toLocaleDateString('en-CA');
+  const period=currentPeriod==='all'?'Full Project':periodLabel(currentPeriod);
+  const compPct=acts.length>0?Math.round(done/acts.length*100):0;
+
+  const memberRows = facSubs.map(s => {
+    const mActs = filterByPeriod(s.activities.map(a=>({...a,_sub:s})), currentPeriod);
+    const mDone = mActs.filter(a=>a.status==='Completed').length;
+    const mPillars = [...new Set(mActs.flatMap(a=>a.themes||[]))].join(', ');
+    return `<tr><td>${s.respondent.full_name}</td><td>${s.respondent.position||'—'}</td><td style="text-align:center">${mActs.length}</td><td style="text-align:center;color:#15803d;font-weight:700">${mDone}</td><td>${mPillars||'—'}</td></tr>`;
+  }).join('');
+
+  const actRows = acts.map(a => `<tr><td>${a.title}</td><td>${a._sub.respondent.full_name}</td><td>${(a.themes||[]).join(', ')}</td><td style="color:${a.status==='Completed'?'#15803d':a.status==='Ongoing'?'#a05c00':'#1e3a5f'};font-weight:600">${a.status}</td><td>${a.partner_institution||'—'}</td></tr>`).join('');
+
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${fk} Dean Report — ${period}</title><style>
+body{font-family:'Segoe UI',Arial,sans-serif;max-width:880px;margin:0 auto;padding:40px;color:#1a202c}
+.cover{background:linear-gradient(135deg,#152c47,#1e3a5f);color:#fff;padding:36px;border-radius:12px;margin-bottom:32px}
+.cover-sub{font-size:12px;opacity:0.6;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.cover h1{font-size:22px;font-weight:900;margin:0 0 4px}.cover h2{font-size:14px;font-weight:400;opacity:0.75;margin:0 0 20px}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:28px}
+.stat-box{background:#f8fafc;border-radius:10px;padding:14px;text-align:center;border-top:4px solid #e2e8f0}
+.stat-box .n{font-size:26px;font-weight:800}.stat-box .l{font-size:11px;color:#64748b;margin-top:2px}
+.section{margin-bottom:26px}.section h3{font-size:15px;font-weight:800;color:#1e3a5f;border-bottom:2px solid #e2e8f0;padding-bottom:6px;margin-bottom:12px}
+table{width:100%;border-collapse:collapse;font-size:12.5px}th{background:#1e3a5f;color:#fff;padding:9px 12px;text-align:left;font-size:11px;text-transform:uppercase}td{padding:9px 12px;border-bottom:1px solid #f1f5f9}
+.no-print{display:flex;gap:10px;justify-content:flex-end;margin-bottom:20px}.btn{padding:9px 20px;border:none;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer}.btn-p{background:#1e3a5f;color:#fff}.btn-c{background:#f1f5f9;color:#334155}
+@media print{.no-print{display:none!important}}
+</style></head><body>
+<div class="no-print"><button class="btn btn-p" onclick="window.print()">🖨️ Print / Save PDF</button><button class="btn btn-c" onclick="window.close()">✕ Close</button></div>
+<div class="cover">
+  <div class="cover-sub">Nkabom Africa–Agrifood Collaborative · McGill University</div>
+  <h1>${FAC_FULL_NAMES[fk]} (${fk})</h1>
+  <h2>Nkabom Collaborative Activity Report — ${period} · Generated ${today}</h2>
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-top:12px">
+    ${[['Total',acts.length],['Completed',done],['Ongoing',go],['Planned',plan],['Partners',partners.size]].map(([l,n])=>`<div style="text-align:center"><div style="font-size:28px;font-weight:800;line-height:1">${n}</div><div style="font-size:11px;opacity:0.65">${l}</div></div>`).join('')}
+  </div>
+</div>
+<div class="section"><h3>Executive Summary</h3>
+<p style="background:#eef3fa;padding:14px 18px;border-radius:8px;border-left:4px solid #1e3a5f;font-size:13px;line-height:1.7">
+The ${FAC_FULL_NAMES[fk]} has recorded <strong>${acts.length} activit${acts.length!==1?'ies':'y'}</strong> under the Nkabom Collaborative for the reporting period <strong>${period}</strong>. Of these, <strong>${done} (${compPct}%) are completed</strong>, ${go} are ongoing, and ${plan} are planned. The faculty has engaged with <strong>${partners.size} Ghanaian partner institution${partners.size!==1?'s':''}</strong>, and <strong>${facSubs.length} faculty member${facSubs.length!==1?'s':''}</strong> have submitted activity reports.
+</p></div>
+<div class="section"><h3>Faculty Member Performance</h3>
+<table><thead><tr><th>Name</th><th>Position</th><th>Activities</th><th>Completed</th><th>Pillars</th></tr></thead><tbody>
+${memberRows||'<tr><td colspan="5" style="text-align:center;color:#64748b;font-style:italic">No submissions</td></tr>'}
+</tbody></table></div>
+${partners.size>0?`<div class="section"><h3>Partner Institutions</h3><ul style="columns:2;gap:24px;font-size:13px;line-height:2">${[...partners].sort().map(p=>`<li>${p}</li>`).join('')}</ul></div>`:''}
+${acts.length>0?`<div class="section"><h3>Activity Details</h3><table><thead><tr><th>Activity</th><th>Faculty Member</th><th>Pillars</th><th>Status</th><th>Partner</th></tr></thead><tbody>${actRows}</tbody></table></div>`:''}
+<p style="font-size:11px;color:#94a3b8;text-align:center;margin-top:32px;border-top:1px solid #e2e8f0;padding-top:16px">Nkabom Faculty Activity Map · Academic Lead Office · McGill University · ${today}</p>
+</body></html>`;
+  openReportWindow(html);
+  showToast(`📄 ${fk} Dean Report generated.`);
+}
+
+/* ══════════════════════════════════════════
+   PILLAR VIEW
+══════════════════════════════════════════ */
+function renderPillarView() {
+  const acts = filteredActs();
+  document.getElementById('pillars-count-hint').textContent = acts.length+' activit'+(acts.length!==1?'ies':'y')+(currentPeriod!=='all'?' · '+periodLabel(currentPeriod):'');
+  const grid = document.getElementById('pillar-full-grid');
+  grid.innerHTML = PILLARS.map(key => {
+    const m  = PILLAR_META[key];
+    const pa = acts.filter(a=>a.themes&&a.themes.includes(key));
+    const d  = pa.filter(a=>a.status==='Completed').length;
+    const g  = pa.filter(a=>a.status==='Ongoing').length;
+    const p  = pa.filter(a=>a.status==='Planned').length;
+    const tot= pa.length;
+    const tgt= getTarget(key, currentPeriod);
+    const actPct = tot>0?Math.round(d/tot*100):0;
+    const tgtPct = tgt>0?Math.min(100,Math.round(d/tgt*100)):0;
+    const partnerSet = new Set(pa.map(a=>a.partner_institution).filter(Boolean));
+    const facSet     = new Set(pa.map(a=>FAC_SHORT[a._sub.respondent.faculty]||a._sub.respondent.faculty));
+    return `<div class="pillar-full-card">
+      <div class="pillar-full-header ${m.cls}">
+        <div><div class="pillar-full-title">${m.icon} ${key}</div><div class="pillar-full-sub">${m.desc.slice(0,80)}…</div></div>
+        <div class="pillar-full-stat"><div class="big">${tot}</div><div class="sm">activities</div></div>
+      </div>
+      <div class="pillar-full-body">
+        <div class="pillar-stat-row">
+          <div class="pillar-mini-stat"><div class="n" style="color:#15803d">${d}</div><div class="l">Completed</div></div>
+          <div class="pillar-mini-stat"><div class="n" style="color:var(--ent-color)">${g}</div><div class="l">Ongoing</div></div>
+          <div class="pillar-mini-stat"><div class="n" style="color:var(--mcgill-dark)">${p}</div><div class="l">Planned</div></div>
+          <div class="pillar-mini-stat"><div class="n" style="color:var(--mcgill-mid)">${partnerSet.size}</div><div class="l">Partners</div></div>
+        </div>
+        ${tgt>0?`
+        <div class="pillar-target-row">
+          <div class="pillar-target-label">vs. Target (${tgt})</div>
+          <div class="gauge-outer">
+            <div class="gauge-inner" style="width:${tgtPct}%;background:${m.color.replace('var(','').replace(')','').trim()};background:${tgtPct>=100?'#15803d':''}; background-color:${tgtPct>=100?'#15803d':tgt>0&&tgtPct>=70?'#a05c00':'#1e5fa8'}"></div>
+            <div class="gauge-target-line" style="right:-1px;left:auto;position:absolute;top:-3px;width:3px;height:22px;background:#dc2626;border-radius:2px;right:0"></div>
+          </div>
+          <div class="gauge-label" style="color:${tgtPct>=100?'#15803d':tgtPct>=70?'#a05c00':'#1e3a5f'}">${d}/${tgt} (${tgtPct}%)</div>
+        </div>`:''}
+        <div class="pillar-target-row">
+          <div class="pillar-target-label">Completion Rate</div>
+          <div class="gauge-outer"><div class="gauge-inner" style="width:${actPct}%;background-color:#1a6b44"></div></div>
+          <div class="gauge-label" style="color:#1a6b44">${actPct}%</div>
+        </div>
+        <div style="font-size:11px;color:var(--gray-500);margin:10px 0 6px"><strong>Faculties engaged:</strong> ${[...facSet].join(', ')||'None'}</div>
+        <div style="font-size:11px;color:var(--gray-500);margin-bottom:12px"><strong>Partners:</strong> ${partnerSet.size>0?[...partnerSet].join('; '):'None recorded'}</div>
+        ${tot>0?`<div style="font-size:12px;font-weight:700;color:var(--gray-700);margin-bottom:8px">Activities (${tot})</div>
+        <div class="pillar-activities-list">${pa.map(a=>`
+          <div class="pillar-act-item">
+            <span class="status-dot ${statusClass(a.status)}" style="margin-top:2px;flex-shrink:0"></span>
+            <div class="pillar-act-info">
+              <div class="title">${a.title}</div>
+              <div class="meta">
+                <span>${FAC_SHORT[a._sub.respondent.faculty]||a._sub.respondent.faculty} — ${a._sub.respondent.full_name}</span>
+                ${a.partner_institution?`<span>· ${a.partner_institution}</span>`:''}
+                ${a.start_date?`<span>· ${a.start_date}${a.end_date?' → '+a.end_date:''}</span>`:''}
+              </div>
+            </div>
+          </div>`).join('')}</div>`:'<p style="color:var(--gray-500);font-size:12px;font-style:italic">No activities in this period.</p>'}
+      </div></div>`;
+  }).join('');
+}
+
+/* ══════════════════════════════════════════
+   PARTNER VIEW
+══════════════════════════════════════════ */
+function renderPartnerView() {
+  const grid = document.getElementById('partner-grid-view');
+  const acts = filteredActs().filter(a=>a.partner_institution);
+  const partnerMap = {};
+  acts.forEach(a => { if (!partnerMap[a.partner_institution]) partnerMap[a.partner_institution]=[]; partnerMap[a.partner_institution].push(a); });
+  const partners = Object.keys(partnerMap).sort();
+  document.getElementById('partner-count-hint').textContent = partners.length+' partner'+(partners.length!==1?'s':'')+' engaged'+(currentPeriod!=='all'?' · '+periodLabel(currentPeriod):'');
+  if (partners.length===0) { grid.innerHTML=`<div class="empty-state" style="grid-column:span 2"><div class="icon">🤝</div><h4>No partner data yet</h4><p>Import submissions to see partner institution engagement.</p></div>`; return; }
+  grid.innerHTML = partners.map(p => {
+    const pActs = partnerMap[p];
+    const byMember = {};
+    pActs.forEach(a => { const n=a._sub.respondent.full_name; if(!byMember[n]) byMember[n]={sub:a._sub,acts:[]}; byMember[n].acts.push(a); });
+    return `<div class="partner-card">
+      <div class="partner-card-header"><div class="partner-card-name">🏛️ ${p}</div><div class="partner-card-count">${pActs.length} activit${pActs.length!==1?'ies':'y'} · ${Object.keys(byMember).length} faculty member${Object.keys(byMember).length!==1?'s':''}</div></div>
+      <div class="partner-card-body">${Object.values(byMember).map(m=>`
+        <div class="partner-faculty-item"><div class="partner-faculty-dot"></div><div class="partner-faculty-info">
+          <div class="partner-faculty-name">${m.sub.respondent.full_name} <span style="font-weight:400;color:var(--gray-500)">(${FAC_SHORT[m.sub.respondent.faculty]||m.sub.respondent.faculty})</span></div>
+          ${m.acts.map(a=>`<div class="partner-faculty-act">${a.title} — <span class="status-dot ${statusClass(a.status)}">${a.status}</span></div>`).join('')}
+        </div></div>`).join('')}
+      </div></div>`;
+  }).join('');
+}
+
+/* ══════════════════════════════════════════
+   TARGETS VIEW
+══════════════════════════════════════════ */
+let activeTargetTab = 'overall';
+
+function renderTargetView() {
+  const tabs   = document.getElementById('target-period-tabs');
+  const content= document.getElementById('target-period-content');
+
+  // Build period keys from data
+  const acts = allActivities();
+  const years=new Set(), quarters=new Set();
+  acts.forEach(a => { const p=parsePeriod(getActDate(a)); if(p){ years.add(p.yearStr); quarters.add(p.quarterStr); } });
+  // Always include current year
+  years.add(String(new Date().getFullYear()));
+
+  const tabList = [{key:'overall',label:'🌐 Overall'}];
+  [...years].sort().forEach(y => {
+    tabList.push({key:y,label:'📆 '+y});
+    ['Q1','Q2','Q3','Q4'].forEach(q => { const qs=y+'-'+q; if(quarters.has(qs)) tabList.push({key:qs,label:q+' '+y}); });
+  });
+
+  if (!tabList.find(t=>t.key===activeTargetTab)) activeTargetTab='overall';
+  tabs.innerHTML = tabList.map(t=>`<div class="period-tab ${t.key===activeTargetTab?'active':''}" onclick="switchTargetTab('${t.key}')">${t.label}</div>`).join('');
+
+  const periodKey = activeTargetTab;
+  const acts2 = filterByPeriod(allActivities(), periodKey==='overall'?'all':periodKey);
+  const label  = periodKey==='overall'?'Overall':periodLabel(periodKey);
+
+  let tObj;
+  if (periodKey==='overall')              tObj = targets.overall || {};
+  else if (periodKey.match(/^\d{4}$/))    tObj = (targets.annual    && targets.annual[periodKey])    || {};
+  else if (periodKey.match(/^\d{4}-Q\d$/)) tObj = (targets.quarterly && targets.quarterly[periodKey]) || {};
+  else tObj = {};
+
+  content.innerHTML = `
+  <div class="target-section">
+    <div class="target-section-header">
+      <span>🎯 Activity Completion Targets — ${label}</span>
+      <span style="font-size:11px;font-weight:400;opacity:0.8">Set the number of completed activities you aim to achieve per pillar</span>
+    </div>
+    <div class="target-section-body">
+      <div style="display:grid;grid-template-columns:180px 160px 80px 80px 1fr;gap:8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--gray-500);margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid var(--gray-200)">
+        <span>Pillar</span><span>Target (completed)</span><span>Actual</span><span>Total</span><span>Progress vs Target</span>
+      </div>
+      ${PILLARS.map(key => {
+        const m   = PILLAR_META[key];
+        const pa  = acts2.filter(a=>a.themes&&a.themes.includes(key));
+        const d   = pa.filter(a=>a.status==='Completed').length;
+        const tot = pa.length;
+        const cur = tObj[key]||'';
+        const tgt = Number(cur)||0;
+        const pct = tgt>0?Math.min(100,Math.round(d/tgt*100)):0;
+        return `
+        <div class="target-pillar-row">
+          <div class="target-pillar-name"><span class="theme-tag ${m.cls}">${m.icon} ${key}</span></div>
+          <div class="target-input-wrap">
+            <label>Target</label>
+            <input type="number" min="0" max="999" id="tgt-${periodKey}-${key.replace(/\s/g,'-')}" value="${cur}" placeholder="0" />
+          </div>
+          <div class="target-actual"><div class="n" style="color:#15803d">${d}</div><div style="font-size:10px;color:var(--gray-500)">done</div></div>
+          <div class="target-actual"><div class="n" style="color:var(--mcgill-dark)">${tot}</div><div style="font-size:10px;color:var(--gray-500)">total</div></div>
+          <div style="flex:1">
+            ${tgt>0?`
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="gauge-outer" style="flex:1;height:18px">
+                <div class="gauge-inner" style="height:100%;width:${pct}%;background-color:${pct>=100?'#15803d':pct>=70?'#a05c00':'#2563a8'};border-radius:9px;transition:width 0.6s ease"></div>
+              </div>
+              <span style="font-size:12px;font-weight:700;width:80px;color:${pct>=100?'#15803d':pct>=70?'#a05c00':'#1e3a5f'}">${d}/${tgt} (${pct}%)</span>
+            </div>`:`<span style="font-size:11px;color:var(--gray-500);font-style:italic">Set a target above to visualise progress</span>`}
+          </div>
+        </div>`;
+      }).join('')}
+      <div class="target-save-row">
+        <button class="btn-save-targets" onclick="saveTargetPeriod('${periodKey}')">💾 Save Targets for ${label}</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function switchTargetTab(key) { activeTargetTab = key; renderTargetView(); }
+
+function saveTargetPeriod(periodKey) {
+  const obj = {};
+  PILLARS.forEach(key => {
+    const inp = document.getElementById('tgt-'+periodKey+'-'+key.replace(/\s/g,'-'));
+    if (inp) obj[key] = inp.value ? Number(inp.value) : 0;
+  });
+  if (periodKey==='overall')               targets.overall = obj;
+  else if (periodKey.match(/^\d{4}$/))   { if (!targets.annual)    targets.annual={};    targets.annual[periodKey]=obj; }
+  else if (periodKey.match(/^\d{4}-Q\d/)){ if (!targets.quarterly) targets.quarterly={}; targets.quarterly[periodKey]=obj; }
+  saveTargets();
+  renderTargetView();
+  showToast('✅ Targets saved for '+periodLabel(periodKey==='overall'?'all':periodKey));
+}
+
+/* ══════════════════════════════════════════
+   COMPARE VIEW
+══════════════════════════════════════════ */
+let compareChart = null;
+
+function renderCompareView() {
+  const opts = allPeriodOptions();
+  ['compare-period-a','compare-period-b'].forEach((id,i) => {
+    const sel = document.getElementById(id);
+    const prev = sel.value;
+    sel.innerHTML = '<option value="">— Select Period —</option>';
+    opts.filter(o=>o.value!=='all').forEach(o => { sel.innerHTML += `<option value="${o.value}">${o.label}</option>`; });
+    if (prev && opts.find(o=>o.value===prev)) sel.value = prev;
+  });
+}
+
+function runComparison() {
+  const pA = document.getElementById('compare-period-a').value;
+  const pB = document.getElementById('compare-period-b').value;
+  const out = document.getElementById('compare-output');
+  if (!pA || !pB) { out.innerHTML='<div class="compare-empty">Select two periods above to compare performance.</div>'; return; }
+  if (pA===pB)    { out.innerHTML='<div class="compare-empty">Please select two <em>different</em> periods to compare.</div>'; return; }
+
+  const acts = allActivities();
+  function metrics(period) {
+    const pa = filterByPeriod(acts, period);
+    const total=pa.length, done=pa.filter(a=>a.status==='Completed').length, go=pa.filter(a=>a.status==='Ongoing').length, plan=pa.filter(a=>a.status==='Planned').length;
+    const partners=new Set(pa.map(a=>a.partner_institution).filter(Boolean)).size;
+    const faculties=new Set(pa.map(a=>a._sub.respondent.faculty)).size;
+    const eduN=pa.filter(a=>a.themes&&a.themes.includes('Education')).length;
+    const accN=pa.filter(a=>a.themes&&a.themes.includes('Access and Success')).length;
+    const entN=pa.filter(a=>a.themes&&a.themes.includes('Entrepreneurship')).length;
+    const pct  = total>0?Math.round(done/total*100):0;
+    return { total,done,go,plan,partners,faculties,eduN,accN,entN,pct };
+  }
+  const mA=metrics(pA), mB=metrics(pB);
+
+  function deltaHtml(a,b,label) {
+    const diff=b-a, sign=diff>0?'+':'';
+    const cls=diff>0?'delta-up':diff<0?'delta-down':'delta-same';
+    const arrow=diff>0?'▲':diff<0?'▼':'—';
+    return `<div class="compare-delta-row">
+      <span class="delta-label">${label}</span>
+      <span class="delta-a" style="color:#1e3a5f">${a}</span>
+      <span class="delta-b" style="color:#2563a8">${b}</span>
+      <span class="delta-indicator ${cls}">${arrow} ${sign}${diff}</span>
+    </div>`;
+  }
+
+  if (compareChart) compareChart.destroy();
+
+  out.innerHTML = `
+  <div class="compare-results">
+    <div class="compare-col">
+      <div class="compare-col-header a">📅 ${periodLabel(pA)}</div>
+      <div class="compare-col-body">
+        <div class="compare-metric"><span class="m-label">Total Activities</span><span class="m-value">${mA.total}</span></div>
+        <div class="compare-metric"><span class="m-label">✅ Completed</span><span class="m-value" style="color:#15803d">${mA.done}</span></div>
+        <div class="compare-metric"><span class="m-label">⚡ Ongoing</span><span class="m-value" style="color:var(--ent-color)">${mA.go}</span></div>
+        <div class="compare-metric"><span class="m-label">🗓️ Planned</span><span class="m-value" style="color:var(--mcgill-dark)">${mA.plan}</span></div>
+        <div class="compare-metric"><span class="m-label">Completion Rate</span><span class="m-value">${mA.pct}%</span></div>
+        <div class="compare-metric"><span class="m-label">Partners Engaged</span><span class="m-value">${mA.partners}</span></div>
+        <div class="compare-metric"><span class="m-label">Education Activities</span><span class="m-value" style="color:var(--edu-color)">${mA.eduN}</span></div>
+        <div class="compare-metric"><span class="m-label">Access &amp; Success</span><span class="m-value" style="color:var(--acc-color)">${mA.accN}</span></div>
+        <div class="compare-metric"><span class="m-label">Entrepreneurship</span><span class="m-value" style="color:var(--ent-color)">${mA.entN}</span></div>
+      </div>
+    </div>
+    <div class="compare-col">
+      <div class="compare-col-header b">📅 ${periodLabel(pB)}</div>
+      <div class="compare-col-body">
+        <div class="compare-metric"><span class="m-label">Total Activities</span><span class="m-value">${mB.total}</span></div>
+        <div class="compare-metric"><span class="m-label">✅ Completed</span><span class="m-value" style="color:#15803d">${mB.done}</span></div>
+        <div class="compare-metric"><span class="m-label">⚡ Ongoing</span><span class="m-value" style="color:var(--ent-color)">${mB.go}</span></div>
+        <div class="compare-metric"><span class="m-label">🗓️ Planned</span><span class="m-value" style="color:var(--mcgill-dark)">${mB.plan}</span></div>
+        <div class="compare-metric"><span class="m-label">Completion Rate</span><span class="m-value">${mB.pct}%</span></div>
+        <div class="compare-metric"><span class="m-label">Partners Engaged</span><span class="m-value">${mB.partners}</span></div>
+        <div class="compare-metric"><span class="m-label">Education Activities</span><span class="m-value" style="color:var(--edu-color)">${mB.eduN}</span></div>
+        <div class="compare-metric"><span class="m-label">Access &amp; Success</span><span class="m-value" style="color:var(--acc-color)">${mB.accN}</span></div>
+        <div class="compare-metric"><span class="m-label">Entrepreneurship</span><span class="m-value" style="color:var(--ent-color)">${mB.entN}</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="compare-chart-card">
+    <h4>Side-by-Side Comparison — ${periodLabel(pA)} vs ${periodLabel(pB)}</h4>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px">
+      <div>
+        <div style="font-size:12px;font-weight:700;color:var(--mcgill-dark);margin-bottom:10px">Key Metrics Delta (B − A)</div>
+        <div style="background:var(--gray-50);border-radius:8px;padding:12px">
+          <div style="display:flex;gap:8px;font-size:10px;font-weight:700;text-transform:uppercase;color:var(--gray-500);margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--gray-200)">
+            <span style="flex:1">Metric</span><span style="width:50px;text-align:center">A</span><span style="width:50px;text-align:center">B</span><span style="width:60px;text-align:center">Delta</span>
+          </div>
+          ${deltaHtml(mA.total,mB.total,'Total Activities')}
+          ${deltaHtml(mA.done, mB.done, '✅ Completed')}
+          ${deltaHtml(mA.go,   mB.go,   '⚡ Ongoing')}
+          ${deltaHtml(mA.plan, mB.plan, '🗓️ Planned')}
+          ${deltaHtml(mA.partners,mB.partners,'Partners Engaged')}
+          ${deltaHtml(mA.eduN,mB.eduN,'Education')}
+          ${deltaHtml(mA.accN,mB.accN,'Access & Success')}
+          ${deltaHtml(mA.entN,mB.entN,'Entrepreneurship')}
+        </div>
+      </div>
+      <div><div class="chart-container" style="height:260px"><canvas id="compare-chart-canvas"></canvas></div></div>
+    </div>
+  </div>
+  <div style="text-align:right;margin-bottom:20px">
+    <button class="btn-sm btn-navy-sm" onclick="generateCompareReport('${pA}','${pB}')">📄 Export Comparative Report</button>
+  </div>`;
+
+  // Draw chart
+  setTimeout(() => {
+    const ctx = document.getElementById('compare-chart-canvas');
+    if (!ctx) return;
+    if (compareChart) compareChart.destroy();
+    compareChart = new Chart(ctx, {
+      type:'bar',
+      data:{
+        labels:['Total','Completed','Ongoing','Planned','Partners','Education','Access&Success','Entrepreneurship'],
+        datasets:[
+          {label:periodLabel(pA), data:[mA.total,mA.done,mA.go,mA.plan,mA.partners,mA.eduN,mA.accN,mA.entN], backgroundColor:'rgba(30,58,95,0.8)'},
+          {label:periodLabel(pB), data:[mB.total,mB.done,mB.go,mB.plan,mB.partners,mB.eduN,mB.accN,mB.entN], backgroundColor:'rgba(37,99,168,0.8)'}
+        ]
+      },
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom',labels:{font:{size:10},padding:8}}}, scales:{y:{ticks:{stepSize:1}}} }
+    });
+  },50);
+}
+
+/* ══════════════════════════════════════════
+   REPORTS VIEW
+══════════════════════════════════════════ */
+let selectedReportType = 'monthly';
+
+function renderReportView() {
+  const sel = document.getElementById('report-period-select');
+  const prev = sel.value;
+  const opts = allPeriodOptions();
+  sel.innerHTML = '';
+  opts.forEach(o => sel.innerHTML += `<option value="${o.value}">${o.label}</option>`);
+  if (opts.find(o=>o.value===prev)) sel.value=prev;
+  renderReportHistory();
+}
+
+function selectReportType(type, el) {
+  selectedReportType = type;
+  document.querySelectorAll('.report-type-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function renderReportHistory() {
+  const hist = document.getElementById('report-history');
+  const items= document.getElementById('report-history-items');
+  if (reportHistory.length===0) { hist.style.display='none'; return; }
+  hist.style.display='block';
+  items.innerHTML = reportHistory.map((r,i) => `
+    <div class="report-preview-item">
+      <span class="rp-icon">📄</span>
+      <div class="rp-info"><div class="rp-name">${r.title}</div><div class="rp-meta">${r.generated} · ${r.acts} activities</div></div>
+      <button class="rp-btn" onclick='openReportWindow(${JSON.stringify(r.html)})'>View</button>
+    </div>`).join('');
+}
+
+function generateReport() {
+  const period = document.getElementById('report-period-select').value;
+  const type   = selectedReportType;
+  const acts   = filterByPeriod(allActivities(), period);
+  const label  = periodLabel(period);
+  const today  = new Date().toLocaleDateString('en-CA');
+
+  const total=acts.length, done=acts.filter(a=>a.status==='Completed').length, go=acts.filter(a=>a.status==='Ongoing').length, plan=acts.filter(a=>a.status==='Planned').length;
+  const partners=new Set(acts.map(a=>a.partner_institution).filter(Boolean));
+  const compPct = total>0?Math.round(done/total*100):0;
+
+  const pillarRows = PILLARS.map(key => {
+    const m  = PILLAR_META[key];
+    const pa = acts.filter(a=>a.themes&&a.themes.includes(key));
+    const d=pa.filter(a=>a.status==='Completed').length, g=pa.filter(a=>a.status==='Ongoing').length, p=pa.filter(a=>a.status==='Planned').length;
+    const tgt = getTarget(key, period);
+    const pct = pa.length>0?Math.round(d/pa.length*100):0;
+    const tgtStr = tgt>0 ? ` / ${tgt} target (${Math.min(100,Math.round(d/tgt*100))}%)` : '';
+    return `<tr><td>${m.icon} <strong>${key}</strong></td><td style="text-align:center">${pa.length}</td><td style="text-align:center;color:#15803d"><strong>${d}${tgtStr}</strong></td><td style="text-align:center;color:#a05c00">${g}</td><td style="text-align:center;color:#1e3a5f">${p}</td><td style="text-align:center">${pct}%</td></tr>`;
+  }).join('');
+
+  const facRows = FACULTIES.map(f => {
+    const fa = acts.filter(a=>a._sub.respondent.faculty===f);
+    const d=fa.filter(a=>a.status==='Completed').length;
+    const members=new Set(fa.map(a=>a._sub.respondent.full_name));
+    return fa.length>0?`<tr><td>${FAC_SHORT[f]||f}</td><td style="text-align:center">${[...members].length}</td><td style="text-align:center">${fa.length}</td><td style="text-align:center;color:#15803d">${d}</td></tr>`:'';
+  }).join('');
+
+  const partnerRows = [...partners].sort().map(p => {
+    const pa = acts.filter(a=>a.partner_institution===p);
+    const pillarsSet = new Set(pa.flatMap(a=>a.themes||[]));
+    return `<tr><td>${p}</td><td style="text-align:center">${pa.length}</td><td>${[...pillarsSet].join(', ')}</td></tr>`;
+  }).join('');
+
+  const actDetails = acts.map(a => `<tr><td>${a.title}</td><td>${FAC_SHORT[a._sub.respondent.faculty]||a._sub.respondent.faculty}</td><td>${(a.themes||[]).join(', ')}</td><td style="color:${a.status==='Completed'?'#15803d':a.status==='Ongoing'?'#a05c00':'#1e3a5f'};font-weight:600">${a.status}</td><td>${a.partner_institution||'—'}</td></tr>`).join('');
+
+  const challenges = [...new Set(submissions.map(s=>s.additional?.challenges_barriers).filter(Boolean))];
+  const achievements = [...new Set(submissions.map(s=>s.additional?.outcomes_achievements).filter(Boolean))];
+
+  const typeLabel = {monthly:'Monthly Progress Report',quarterly:'Quarterly Progress Report',annual:'Annual Progress Report',overall:'Overall Project Report'}[type]||'Progress Report';
+
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${typeLabel} — ${label}</title><style>
+body{font-family:'Segoe UI',Arial,sans-serif;max-width:900px;margin:0 auto;padding:40px;color:#1a202c}
+.cover{background:linear-gradient(135deg,#152c47,#1e3a5f);color:#fff;padding:40px;border-radius:12px;margin-bottom:32px}
+.cover h1{font-size:22px;font-weight:800;margin:0 0 6px}
+.cover h2{font-size:15px;font-weight:400;opacity:0.75;margin:0 0 20px}
+.cover-meta{display:flex;gap:24px;margin-top:16px}
+.cover-stat{text-align:center}.cover-stat .n{font-size:32px;font-weight:800}.cover-stat .l{font-size:11px;opacity:0.65}
+.section{margin-bottom:28px}.section h3{font-size:15px;font-weight:800;color:#1e3a5f;border-bottom:2px solid #e2e8f0;padding-bottom:6px;margin-bottom:14px}
+table{width:100%;border-collapse:collapse;font-size:13px}th{background:#1e3a5f;color:#fff;padding:9px 12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:0.4px}
+td{padding:9px 12px;border-bottom:1px solid #f1f5f9}tr:hover td{background:#f8fafc}
+.exec-box{background:#eef3fa;border-left:4px solid #1e3a5f;padding:16px 20px;border-radius:0 8px 8px 0;font-size:13px;line-height:1.7;margin-bottom:20px}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;color:#fff}
+.badge.edu{background:#1e5fa8}.badge.acc{background:#1a6b44}.badge.ent{background:#a05c00}
+.metric-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.metric-box{background:#f8fafc;border-radius:10px;padding:16px;text-align:center;border-top:4px solid #e2e8f0}
+.metric-box.done{border-top-color:#15803d}.metric-box.go{border-top-color:#a05c00}.metric-box.plan{border-top-color:#1e3a5f}.metric-box.tot{border-top-color:#1e5fa8}
+.metric-box .n{font-size:28px;font-weight:800}.metric-box .l{font-size:11px;color:#64748b;margin-top:3px}
+.no-print{display:flex;gap:10px;justify-content:flex-end;margin-bottom:20px}
+.btn{padding:10px 22px;border:none;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer}
+.btn-print{background:#1e3a5f;color:#fff}.btn-close{background:#f1f5f9;color:#334155}
+ul{padding-left:20px;margin:6px 0}li{margin-bottom:4px;font-size:13px;line-height:1.6}
+@media print{.no-print{display:none!important}body{padding:24px}}
+</style></head><body>
+<div class="no-print"><button class="btn btn-print" onclick="window.print()">🖨️ Print / Save PDF</button><button class="btn btn-close" onclick="window.close()">✕ Close</button></div>
+<div class="cover">
+  <div style="font-size:12px;opacity:0.6;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Nkabom Africa–Agrifood Collaborative · McGill University</div>
+  <h1>${typeLabel}</h1>
+  <h2>Reporting Period: ${label} &nbsp;·&nbsp; Generated: ${today}</h2>
+  <div class="cover-meta">
+    <div class="cover-stat"><div class="n">${total}</div><div class="l">Total Activities</div></div>
+    <div class="cover-stat"><div class="n">${done}</div><div class="l">Completed</div></div>
+    <div class="cover-stat"><div class="n">${go}</div><div class="l">Ongoing</div></div>
+    <div class="cover-stat"><div class="n">${submissions.length}</div><div class="l">Faculty Members</div></div>
+    <div class="cover-stat"><div class="n">${partners.size}</div><div class="l">Partners</div></div>
+  </div>
+</div>
+
+<div class="section"><h3>Executive Summary</h3>
+<div class="exec-box">
+For the period <strong>${label}</strong>, the Nkabom Collaborative recorded <strong>${total} faculty activit${total!==1?'ies':'y'}</strong> across McGill's four participating faculties.
+Of these, <strong>${done} (${compPct}%) have been completed</strong>, ${go} are currently ongoing, and ${plan} are planned for future implementation.
+The collaborative engaged <strong>${partners.size} Ghanaian partner institution${partners.size!==1?'s':''}</strong>.
+Activities spanned all three strategic pillars: Education (${acts.filter(a=>a.themes&&a.themes.includes('Education')).length} activities),
+Access &amp; Success (${acts.filter(a=>a.themes&&a.themes.includes('Access and Success')).length}), and
+Entrepreneurship (${acts.filter(a=>a.themes&&a.themes.includes('Entrepreneurship')).length}).
+${done===0&&total>0?'No activities have been completed in this period — several are progressing well and are expected to conclude soon.':''}
+${compPct>=80?'The overall completion rate is strong, demonstrating excellent execution across all pillars.':''}
+</div></div>
+
+<div class="section"><h3>Key Metrics</h3>
+<div class="metric-row">
+  <div class="metric-box tot"><div class="n" style="color:#1e5fa8">${total}</div><div class="l">Total Activities</div></div>
+  <div class="metric-box done"><div class="n" style="color:#15803d">${done}</div><div class="l">Completed (${compPct}%)</div></div>
+  <div class="metric-box go"><div class="n" style="color:#a05c00">${go}</div><div class="l">Ongoing</div></div>
+  <div class="metric-box plan"><div class="n" style="color:#1e3a5f">${plan}</div><div class="l">Planned</div></div>
+</div></div>
+
+<div class="section"><h3>Progress by Strategic Pillar</h3>
+<table><thead><tr><th>Pillar</th><th>Total</th><th>Completed</th><th>Ongoing</th><th>Planned</th><th>Completion %</th></tr></thead>
+<tbody>${pillarRows}</tbody></table></div>
+
+<div class="section"><h3>Faculty Engagement</h3>
+<table><thead><tr><th>Faculty</th><th>Members</th><th>Activities</th><th>Completed</th></tr></thead>
+<tbody>${facRows||'<tr><td colspan="4" style="text-align:center;color:#64748b;font-style:italic">No faculty data for this period</td></tr>'}</tbody></table></div>
+
+${partners.size>0?`<div class="section"><h3>Partner Institutions</h3>
+<table><thead><tr><th>Institution</th><th>Activities</th><th>Pillars</th></tr></thead>
+<tbody>${partnerRows}</tbody></table></div>`:''}
+
+${achievements.length>0?`<div class="section"><h3>Achievements &amp; Highlights</h3><ul>${achievements.map(a=>`<li>${a}</li>`).join('')}</ul></div>`:''}
+${challenges.length>0?`<div class="section"><h3>Challenges &amp; Barriers</h3><ul>${challenges.map(c=>`<li>${c}</li>`).join('')}</ul></div>`:''}
+
+${total>0?`<div class="section"><h3>Detailed Activity Listing</h3>
+<table><thead><tr><th>Activity</th><th>Faculty</th><th>Pillars</th><th>Status</th><th>Partner Institution</th></tr></thead>
+<tbody>${actDetails}</tbody></table></div>`:''}
+
+<div style="margin-top:32px;padding-top:16px;border-top:1px solid #e2e8f0;font-size:11px;color:#94a3b8;text-align:center">
+  Generated by Nkabom Faculty Activity Map · Academic Lead Office · McGill University · ${today}
+</div>
+</body></html>`;
+
+  openReportWindow(html);
+  reportHistory.unshift({ title:`${typeLabel} — ${label}`, generated:today, acts:total, html });
+  saveReportHistory();
+  renderReportHistory();
+  showToast('📄 Report generated. New window opened.');
+}
+
+function generateCompareReport(pA, pB) {
+  const acts = allActivities();
+  function m(p) {
+    const pa=filterByPeriod(acts,p);
+    return { total:pa.length, done:pa.filter(a=>a.status==='Completed').length, go:pa.filter(a=>a.status==='Ongoing').length, plan:pa.filter(a=>a.status==='Planned').length,
+      partners:new Set(pa.map(a=>a.partner_institution).filter(Boolean)).size,
+      eduN:pa.filter(a=>a.themes&&a.themes.includes('Education')).length, accN:pa.filter(a=>a.themes&&a.themes.includes('Access and Success')).length, entN:pa.filter(a=>a.themes&&a.themes.includes('Entrepreneurship')).length };
+  }
+  const mA=m(pA), mB=m(pB);
+  const today = new Date().toLocaleDateString('en-CA');
+  function row(label,a,b){const d=b-a;const cls=d>0?'color:#15803d':d<0?'color:#dc2626':'color:#64748b';const arrow=d>0?'▲ +':d<0?'▼ ':'= ';return `<tr><td>${label}</td><td style="text-align:center">${a}</td><td style="text-align:center">${b}</td><td style="text-align:center;${cls};font-weight:700">${arrow}${d}</td></tr>`;}
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Comparative Report: ${periodLabel(pA)} vs ${periodLabel(pB)}</title><style>body{font-family:'Segoe UI',Arial,sans-serif;max-width:800px;margin:0 auto;padding:40px}h1{color:#1e3a5f}table{width:100%;border-collapse:collapse;margin-bottom:24px;font-size:13px}th{background:#1e3a5f;color:#fff;padding:9px 12px;text-align:left}td{padding:9px 12px;border-bottom:1px solid #f1f5f9}.no-print{margin-bottom:20px;display:flex;gap:10px}.btn{padding:9px 20px;border:none;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer}.btn-print{background:#1e3a5f;color:#fff}.btn-close{background:#f1f5f9;color:#334155}@media print{.no-print{display:none!important}}</style></head><body>
+<div class="no-print"><button class="btn btn-print" onclick="window.print()">🖨️ Print / Save PDF</button><button class="btn btn-close" onclick="window.close()">✕ Close</button></div>
+<h1>Comparative Progress Report</h1>
+<p style="color:#64748b;margin-bottom:24px">Nkabom Africa–Agrifood Collaborative · McGill University · Generated ${today}</p>
+<p style="background:#eef3fa;padding:14px 18px;border-radius:8px;border-left:4px solid #1e3a5f;font-size:13px;line-height:1.7;margin-bottom:24px">
+This report compares faculty activities between <strong>${periodLabel(pA)}</strong> and <strong>${periodLabel(pB)}</strong>. 
+Total activities ${mB.total>mA.total?`increased from ${mA.total} to ${mB.total} (▲${mB.total-mA.total})`:mB.total<mA.total?`decreased from ${mA.total} to ${mB.total} (▼${mA.total-mB.total})`:`remained the same at ${mA.total}`}. 
+Completed activities ${mB.done>mA.done?'showed growth':'changed'} from ${mA.done} to ${mB.done}.
+</p>
+<table><thead><tr><th>Metric</th><th>${periodLabel(pA)}</th><th>${periodLabel(pB)}</th><th>Change</th></tr></thead><tbody>
+${row('Total Activities',mA.total,mB.total)}${row('Completed',mA.done,mB.done)}${row('Ongoing',mA.go,mB.go)}${row('Planned',mA.plan,mB.plan)}
+${row('Partners Engaged',mA.partners,mB.partners)}${row('Education Activities',mA.eduN,mB.eduN)}${row('Access & Success Activities',mA.accN,mB.accN)}${row('Entrepreneurship Activities',mA.entN,mB.entN)}
+</tbody></table>
+<p style="font-size:11px;color:#94a3b8;text-align:center;margin-top:32px">Generated by Nkabom Faculty Activity Map · Academic Lead Office · McGill University · ${today}</p>
+</body></html>`;
+  openReportWindow(html);
+  showToast('📄 Comparative report generated.');
+}
+
+function openReportWindow(html) {
+  const w = window.open('','_blank','width=960,height=800,scrollbars=yes');
+  if (w) { w.document.open(); w.document.write(html); w.document.close(); }
+  else showToast('⚠️ Pop-up blocked. Please allow pop-ups for this page.');
+}
+
+/* ══════════════════════════════════════════
+   IMPORT / MANUAL ENTRY
+══════════════════════════════════════════ */
+function renderImportList() {
+  const wrap=document.getElementById('imported-list-wrap'), items=document.getElementById('imported-list-items');
+  if (submissions.length===0) { wrap.style.display='none'; return; }
+  wrap.style.display='block';
+  items.innerHTML = submissions.map(s=>`
+    <div class="imported-item">
+      <span style="font-size:20px">👤</span>
+      <div><strong>${s.respondent.full_name}</strong><br><span style="font-size:11px;color:var(--gray-500)">${s.respondent.faculty} · Submitted ${s.respondent.submission_date}</span></div>
+      <span class="act-count">${s.activities.length} activities</span>
+      <span class="del-btn" onclick="deleteSubmission('${s.id}')" title="Remove">🗑️</span>
+    </div>`).join('');
+}
+
+function dragOver(e) { e.preventDefault(); document.getElementById('import-zone').classList.add('drag-over'); }
+function dragLeave()  { document.getElementById('import-zone').classList.remove('drag-over'); }
+function dropFiles(e) { e.preventDefault(); dragLeave(); handleFiles(e.dataTransfer.files); }
+
+function handleFiles(files) {
+  let loaded=0, skipped=0;
+  const readers = Array.from(files).map(file => new Promise(resolve => {
+    const r=new FileReader();
+    r.onload = ev => {
+      try {
+        const data=JSON.parse(ev.target.result);
+        if (!data.respondent||!data.activities) { resolve(); return; }
+        const dupKey=(data.respondent.full_name||'')+'_'+(data.respondent.submission_date||'');
+        if (submissions.some(s=>((s.respondent.full_name||'')+'_'+(s.respondent.submission_date||''))===dupKey)) { skipped++; resolve(); return; }
+        submissions.push({...data, id:'sub-'+Date.now()+'-'+Math.random().toString(36).slice(2,6), imported_at:new Date().toISOString()});
+        loaded++;
+      } catch(e) {} resolve();
+    };
+    r.readAsText(file);
+  }));
+  Promise.all(readers).then(() => {
+    saveStore(); buildPeriodFilter(); renderImportList();
+    let msg='';
+    if (loaded>0)  msg+=`✅ ${loaded} submission${loaded>1?'s':''} imported. `;
+    if (skipped>0) msg+=`⚠️ ${skipped} duplicate${skipped>1?'s':''} skipped.`;
+    showToast(msg||'⚠️ No valid JSON submissions found.');
+  });
+}
+
+function deleteSubmission(id) {
+  if (!confirm('Remove this submission from the map?')) return;
+  submissions=submissions.filter(s=>s.id!==id);
+  saveStore(); buildPeriodFilter(); renderImportList();
+  showToast('🗑️ Submission removed.');
+}
+
+function saveManualEntry() {
+  const name=document.getElementById('m-name').value.trim(), faculty=document.getElementById('m-faculty').value, title=document.getElementById('m-title').value.trim(), status=document.getElementById('m-status').value;
+  const themes=['m-edu','m-acc','m-ent'].filter(id=>document.getElementById(id).checked).map(id=>document.getElementById(id).value);
+  if (!name||!faculty||!title||!status||themes.length===0) { showToast('⚠️ Please fill in all required fields (Name, Faculty, Title, Pillar, Status).'); return; }
+  let sub=submissions.find(s=>s.respondent.full_name===name&&s.respondent.faculty===faculty);
+  if (!sub) {
+    sub={id:'manual-'+Date.now(), imported_at:new Date().toISOString(), respondent:{full_name:name,email:document.getElementById('m-email').value,faculty,department:document.getElementById('m-dept').value,position:'',submission_date:new Date().toISOString().slice(0,10)}, activities:[],additional:{}};
+    submissions.push(sub);
+  }
+  sub.activities.push({title,themes,status,description:document.getElementById('m-desc').value,start_date:document.getElementById('m-start').value,end_date:document.getElementById('m-end').value,partner_institution:document.getElementById('m-partner').value,contact_name:document.getElementById('m-contact-name').value,contact_email:document.getElementById('m-contact-email').value,outputs:document.getElementById('m-outputs').value});
+  saveStore(); buildPeriodFilter(); renderImportList(); clearManualForm();
+  showToast(`✅ Activity "${title}" saved for ${name}.`);
+}
+
+function clearManualForm() {
+  ['m-name','m-email','m-dept','m-title','m-desc','m-outputs','m-contact-name','m-contact-email','m-start','m-end'].forEach(id=>{document.getElementById(id).value='';});
+  document.getElementById('m-faculty').value=''; document.getElementById('m-status').value=''; document.getElementById('m-partner').value='';
+  ['m-edu','m-acc','m-ent'].forEach(id=>{document.getElementById(id).checked=false;});
+}
+
+/* ══════════════════════════════════════════
+   EXPORT CSV
+══════════════════════════════════════════ */
+function exportCSV() {
+  const acts=filteredActs();
+  const headers=['Faculty Member','Position','Faculty','Department','Activity Title','Pillar(s)','Status','Partner Institution','Contact Name','Contact Email','Start Date','End Date','Outputs'];
+  const rows=acts.map(a=>[a._sub.respondent.full_name,a._sub.respondent.position,a._sub.respondent.faculty,a._sub.respondent.department,a.title,(a.themes||[]).join('; '),a.status,a.partner_institution,a.contact_name,a.contact_email,a.start_date,a.end_date,a.outputs].map(v=>`"${(v||'').replace(/"/g,'""')}"`));
+  const csv=[headers.map(h=>`"${h}"`), ...rows].join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=`Nkabom_Activity_Map_${new Date().toISOString().slice(0,10)}${currentPeriod!=='all'?'_'+currentPeriod:''}.csv`; a.click(); URL.revokeObjectURL(url);
+  showToast('⬇ CSV exported.');
+}
+
+/* ══════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════ */
+function showToast(msg) {
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),4000);
+}
+
+/* ══════════════════════════════════════════
+   INIT
+══════════════════════════════════════════ */
+(function init() {
+  loadStore();
+  if (submissions.length===0) { submissions=SAMPLE.map(s=>({...s})); saveStore(); }
+  buildPeriodFilter();
+  renderDashboard();
+})();
+</script>
+</body></html>

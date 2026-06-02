@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nkabom Collaborative — Governance Structure</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,Helvetica,sans-serif;background:#DDE3EF;padding:20px;min-height:100vh}
+
+/* ── wrapper ── */
+.wrap{max-width:1180px;margin:0 auto;background:#F4F6FB;border-radius:14px;
+  overflow:hidden;box-shadow:0 8px 36px rgba(0,0,0,.2)}
+
+/* ── title bar ── */
+.title-bar{background:#1B3A6B;border-bottom:4px solid #C8A84B;
+  color:#fff;padding:18px 22px;display:flex;justify-content:center;align-items:center}
+.title-bar h1{font-size:20px;letter-spacing:.4px;text-align:center;font-weight:700}
+
+/* ── body ── */
+.body{padding:22px 24px 28px}
+
+/* ── row ── */
+.row{display:flex;justify-content:center;align-items:stretch;gap:10px}
+
+/* ── boxes ── */
+.box{border-radius:7px;padding:9px 13px;text-align:center;font-size:11.5px;flex-shrink:0}
+.box b{display:block;font-size:12.5px;margin-bottom:3px}
+.box small{display:block;font-size:10px;line-height:1.35;opacity:.9}
+
+.bx-navy  {background:#1B3A6B;color:#fff;border:2px solid #C8A84B}
+.bx-gold  {background:#FFF5CC;color:#1B3A6B;border:2px solid #C8A84B}
+.bx-teal  {background:#2A7A6F;color:#fff;border:2px solid #1E5C55}
+.bx-teal-lt{background:#C7EDE8;color:#1E5C55;border:2px solid #2A7A6F}
+.bx-purp  {background:#4A3D8F;color:#fff;border:2px solid #2A2060}
+.bx-gray  {background:#F2F4F7;color:#374151;border:2px solid #9CA3AF}
+.bx-orange{background:#FEF3E2;color:#8B4513;border:2px solid #D97706}
+.bx-green {background:#D6EDDA;color:#1B5E30;border:2px solid #2A6B3A}
+
+/* partner chips */
+.pchip{border-radius:6px;padding:7px 9px;text-align:center;font-size:10.5px;flex-shrink:0;min-width:95px}
+.pchip b{display:block;font-size:12px;margin-bottom:2px}
+.pchip small{display:block;font-size:9px;opacity:.85}
+.pc-navy  {background:#1B3A6B;color:#fff;border:2px solid #C8A84B}
+.pc-teal  {background:#2A7A6F;color:#fff;border:2px solid #C8A84B}
+.pc-red   {background:#991919;color:#fff;border:2px solid #C8A84B}
+
+/* ── connectors ── */
+.vc{width:2px;margin:0 auto}                    /* vertical line */
+.vc-navy  {background:#1B3A6B}
+.vc-purp  {background:#4A3D8F}
+.vc-teal  {background:#2A7A6F}
+.vc-brown {background:#D97706}
+
+/* fork shape: single stem → horizontal bar → n drops */
+.fork{display:flex;flex-direction:column;align-items:center;width:100%}
+.fork-stem{width:2px;background:#1B3A6B}
+.fork-bar{display:flex;width:var(--fw,440px);align-self:center}
+.fork-bar .seg{flex:1;height:2px;background:var(--fc,#1B3A6B)}
+.fork-drops{display:flex;width:var(--fw,440px);align-self:center;justify-content:space-between}
+.fork-drop{display:flex;flex-direction:column;align-items:center}
+.fork-drop .drop-line{width:2px;background:var(--fc,#1B3A6B)}
+
+/* horizontal connector between two side-by-side items */
+.hline{height:2px;align-self:center;flex:0 0 auto}
+.hl-navy{background:#1B3A6B}
+.hl-teal{background:#2A7A6F}
+.hl-brown{background:#D97706}
+
+/* bidir label */
+.bidir{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:0 6px;gap:2px;flex-shrink:0}
+.bidir .arr{font-size:18px;color:#2A7A6F;line-height:1}
+.bidir .lbl{font-size:8.5px;color:#2A7A6F;font-style:italic;white-space:nowrap}
+
+/* ── McGill zone ── */
+.mcz{border:3px solid #2A7A6F;border-radius:10px;overflow:hidden;
+  box-shadow:0 2px 16px rgba(42,122,111,.18)}
+.mcz-hdr{background:#2A7A6F;color:#fff;padding:9px 18px;
+  display:flex;justify-content:space-between;align-items:center;
+  cursor:pointer;user-select:none;transition:background .2s}
+.mcz-hdr:hover{background:#1E6057}
+.mcz-hdr h3{font-size:12px;letter-spacing:.5px;font-weight:700}
+.mcz-hdr .hint{font-size:9.5px;color:rgba(255,255,255,.7);margin-top:1px}
+.toggle{background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.5);
+  color:#fff;padding:3px 14px;border-radius:20px;font-size:11px;
+  cursor:pointer;transition:background .2s;white-space:nowrap}
+.toggle:hover{background:rgba(255,255,255,.32)}
+.mcz-body{background:#EBF5F4;padding:18px 20px 22px;transition:opacity .25s}
+.mcz-body.hidden{display:none}
+
+/* MOC children row */
+.moc-row{display:flex;justify-content:center;gap:8px}
+.moc-col{display:flex;flex-direction:column;align-items:center;flex:1;min-width:0;max-width:185px}
+.moc-col .box{width:100%}
+.cross-note{font-size:9px;color:#1B5E30;font-style:italic;margin-top:5px;
+  text-align:center;line-height:1.4;max-width:160px}
+
+/* note banners */
+.note{border-radius:6px;padding:7px 14px;font-size:10px;text-align:center}
+.note-gold {background:#FFF5CC;border:1px solid #C8A84B;color:#1B3A6B}
+.note-teal {background:#E4F4F2;border:1px solid #2A7A6F;color:#1E5C55}
+.note-purp {background:#EDEAF8;border:1px solid #4A3D8F;color:#2A2060}
+
+/* legend */
+.legend{background:#fff;border:1.5px solid #D1D5DB;border-radius:8px;
+  padding:12px 18px;display:flex;flex-wrap:wrap;gap:8px 20px;font-size:10px;color:#374151}
+.legend h4{width:100%;font-size:11px;color:#1B3A6B;margin-bottom:2px}
+.leg{display:flex;align-items:center;gap:6px}
+.sw{width:14px;height:14px;border-radius:3px;flex-shrink:0;border:1px solid rgba(0,0,0,.12)}
+
+/* utilities */
+.mt1{margin-top:6px}.mt2{margin-top:12px}.mt3{margin-top:18px}
+.mb1{margin-bottom:6px}.mb2{margin-bottom:12px}
+.tc{text-align:center}.muted{color:#6B7280;font-size:9.5px;font-style:italic}
+
+@media print{
+  body{background:#fff;padding:0}
+  .wrap{box-shadow:none;border-radius:0;max-width:100%}
+  .mcz-body.hidden{display:block!important}
+  .toggle{display:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ═══ TITLE ══════════════════════════════════════════════════════════════ -->
+  <div class="title-bar">
+    <h1>NKABOM COLLABORATIVE — Governance &amp; Academic Coordination Structure</h1>
+  </div>
+
+  <div class="body">
+
+    <!-- ═══ MCF ════════════════════════════════════════════════════════════ -->
+    <div class="row mb2">
+      <div class="box bx-navy" style="min-width:230px">
+        <b>Mastercard Foundation (MCF)</b>
+        <small>Apex Accountability &nbsp;|&nbsp; Funder</small>
+      </div>
+    </div>
+
+    <div class="vc vc-navy" style="height:22px"></div>
+
+    <!-- ═══ PROVOST (centred) + ESC (side box) ══════════════════════════════ -->
+    <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;
+                max-width:960px;margin:0 auto 12px">
+      <div></div><!-- left spacer keeps Provost at true centre -->
+      <div class="box bx-navy" style="min-width:260px">
+        <b>Provost &amp; EVP Academic</b>
+        <small>① McGill Institutional PI → delegates to Academic Lead<br>
+               ② Program PI → chairs ESC → reports to MCF</small>
+      </div>
+      <div style="display:flex;align-items:center">
+        <div class="hline hl-navy" style="width:36px"></div>
+        <div class="box bx-gold" style="min-width:250px">
+          <b>Executive Steering Committee (ESC)</b>
+          <small>Chair: Provost &nbsp;|&nbsp; Members: MCF + All Partners<br>
+                 Strategic Oversight &amp; Accountability</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- vertical line: Provost → Secretariat -->
+    <div class="vc vc-navy" style="height:22px"></div>
+
+    <!-- ═══ SECRETARIAT (centred) + AL-STRATEGIC (side box) ═════════════════ -->
+    <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;
+                max-width:960px;margin:0 auto 6px">
+      <div></div><!-- left spacer -->
+      <div class="box bx-purp" style="min-width:210px">
+        <b>Nkabom Secretariat</b>
+        <small>Director &amp; Assoc. Director<br>M&amp;E · Finance · Communications</small>
+      </div>
+      <div style="display:flex;align-items:center">
+        <div class="bidir">
+          <div class="arr">⇌</div>
+          <div class="lbl">coordination</div>
+        </div>
+        <div class="box bx-teal" style="min-width:210px;border-style:dashed">
+          <b>Academic Lead (Strategic Role)</b>
+          <small>Liaison: MCF · Partners · Secretariat<br>Advisory &amp; Convening</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- connector Secretariat → partner row -->
+    <div class="vc vc-purp" style="height:18px"></div>
+
+    <!-- ═══ CONSORTIUM PARTNERS ════════════════════════════════════════════ -->
+    <p class="tc muted mb1">Consortium Partners — all institutions connected through programme governance (Secretariat)</p>
+    <div class="row mb1" style="flex-wrap:nowrap;gap:7px;justify-content:center">
+      <div class="pchip pc-navy"><b>McGill</b><small>Lead Institution</small></div>
+      <div class="pchip pc-teal"><b>AGI</b><small>GH Partner</small></div>
+      <div class="pchip pc-teal"><b>Ashesi</b><small>GH Partner</small></div>
+      <div class="pchip pc-teal"><b>KTU</b><small>GH Partner</small></div>
+      <div class="pchip pc-red"><b>KNUST ★</b><small>Direct MCF funding</small></div>
+      <div class="pchip pc-teal"><b>UESD</b><small>GH Partner</small></div>
+      <div class="pchip pc-teal"><b>UG</b><small>GH Partner</small></div>
+      <div class="pchip pc-teal"><b>UHAS</b><small>GH Partner</small></div>
+    </div>
+    <div style="height:4px"></div>
+
+    <!-- connector McGill partner → McGill zone -->
+    <div class="vc vc-navy" style="height:16px"></div>
+
+    <!-- ═══ McGILL INTERNAL GOVERNANCE (collapsible) ════════════════════════ -->
+    <div class="mcz">
+      <div class="mcz-hdr" onclick="toggle()">
+        <div>
+          <h3>McGILL UNIVERSITY — INTERNAL GOVERNANCE</h3>
+          <div class="hint">Click to show or hide the McGill internal governance structure</div>
+        </div>
+        <button class="toggle" id="tbtn" onclick="event.stopPropagation();toggle()">▲ Hide</button>
+      </div>
+
+      <div class="mcz-body" id="mczbody">
+
+        <div class="vc vc-navy" style="height:18px"></div>
+
+        <!-- MSLG -->
+        <div class="row mb1" style="align-items:center;gap:0">
+          <div class="box bx-navy" style="min-width:290px">
+            <b>McGill Strategic Leadership Committee (MSLG)</b>
+            <small>Chair: Provost &nbsp;|&nbsp; Provost · Faculty Deans · Academic Lead · Secretariat &nbsp;|&nbsp; Quarterly</small>
+          </div>
+        </div>
+
+        <div class="vc vc-navy" style="height:20px"></div>
+
+        <!-- AL Operational -->
+        <div class="row mb1">
+          <div class="box bx-teal" style="min-width:250px">
+            <b>Academic Lead (Operational Role)</b>
+            <small>Chair: McGill Operational Committee &amp; Finance Coordination Group<br>
+                   Programme oversight · Partner coordination · Delivery</small>
+          </div>
+        </div>
+
+        <!-- fork: AL-Operational → MOC (left) + FCG (right) -->
+        <div class="fork" style="--fw:380px;--fc:#2A7A6F;margin:0 auto">
+          <div class="fork-stem" style="height:18px;background:#2A7A6F"></div>
+          <div class="fork-bar"><div class="seg"></div><div class="seg" style="background:#D97706"></div></div>
+          <div class="fork-drops">
+            <div class="fork-drop"><div class="drop-line" style="height:16px;background:#2A7A6F"></div></div>
+            <div class="fork-drop"><div class="drop-line" style="height:16px;background:#D97706"></div></div>
+          </div>
+        </div>
+
+        <!-- MOC + FCG -->
+        <div class="row mb2" style="align-items:center;gap:0;justify-content:center">
+          <div class="box bx-teal-lt" style="min-width:260px">
+            <b>McGill Operational Committee (MOC)</b>
+            <small>Chair: Academic Lead &nbsp;|&nbsp; Monthly<br>
+                   Academic Lead · Pillar Co-Leads · M&amp;E &amp; Communications</small>
+          </div>
+          <div class="hline hl-brown" style="width:28px"></div>
+          <div class="box bx-orange" style="min-width:185px">
+            <b>Finance Coordination Group</b>
+            <small>Chair: Academic Lead<br>Faculty Finance · Secretariat Finance</small>
+          </div>
+        </div>
+
+        <!-- connector MOC → 5 components -->
+        <div class="fork" style="--fw:880px;--fc:#2A7A6F;margin:0 auto">
+          <div class="fork-stem" style="height:18px;background:#2A7A6F"></div>
+          <div class="fork-bar">
+            <div class="seg"></div><div class="seg"></div><div class="seg"></div>
+            <div class="seg"></div><div class="seg"></div>
+          </div>
+          <div class="fork-drops" style="justify-content:space-around;padding-top:0">
+            <div class="fork-drop"><div class="drop-line" style="height:16px;background:#9CA3AF"></div></div>
+            <div class="fork-drop"><div class="drop-line" style="height:16px;background:#9CA3AF"></div></div>
+            <div class="fork-drop"><div class="drop-line" style="height:16px;background:#2A6B3A"></div></div>
+            <div class="fork-drop"><div class="drop-line" style="height:16px;background:#2A6B3A"></div></div>
+            <div class="fork-drop"><div class="drop-line" style="height:16px;background:#2A6B3A"></div></div>
+          </div>
+        </div>
+
+        <!-- 5 components aligned -->
+        <div class="moc-row mb2">
+
+          <!-- Admin Asst -->
+          <div class="moc-col">
+            <div class="box bx-gray">
+              <b>Admin. Assistant</b>
+              <small>Programme Support<br>&amp; Coordination</small>
+            </div>
+          </div>
+
+          <!-- M&E + Communications Coordinator -->
+          <div class="moc-col">
+            <div class="box bx-gray">
+              <b>M&amp;E &amp; Communications</b>
+              <small>Monitoring, Evaluation,<br>Learning &amp; Communication</small>
+            </div>
+          </div>
+
+          <!-- Pillar 1 -->
+          <div class="moc-col">
+            <div class="box bx-green">
+              <b>Pillar Co-Lead 1</b>
+              <small>Education</small>
+            </div>
+            <p class="cross-note">Cross-faculty pillar team</p>
+          </div>
+
+          <!-- Pillar 2 -->
+          <div class="moc-col">
+            <div class="box bx-green">
+              <b>Pillar Co-Lead 2</b>
+              <small>Access &amp; Success</small>
+            </div>
+            <p class="cross-note">Cross-faculty pillar team</p>
+          </div>
+
+          <!-- Pillar 3 -->
+          <div class="moc-col">
+            <div class="box bx-green">
+              <b>Pillar Co-Lead 3</b>
+              <small>Entrepreneurship</small>
+            </div>
+            <p class="cross-note">Cross-faculty pillar team</p>
+          </div>
+
+        </div><!-- /moc-row -->
+
+        <!-- Dual role note -->
+        <div class="note note-teal">
+          ★ Each <strong>Pillar Co-Lead</strong> also serves as <strong>Faculty Lead</strong> within their home faculty,
+          and reports to the respective <strong>Faculty Dean</strong> for institutional accountability.
+          Each pillar team draws members across multiple McGill faculties (FAES · SCS · SGI · SPGH).
+        </div>
+
+      </div><!-- /mcz-body -->
+    </div><!-- /mcz -->
+
+    <!-- ═══ LEGEND ══════════════════════════════════════════════════════════ -->
+    <div class="legend mt2">
+      <h4>LEGEND</h4>
+      <div class="leg"><div class="sw" style="background:#1B3A6B;border-color:#C8A84B"></div> MCF · Provost · MSLG (governance)</div>
+      <div class="leg"><div class="sw" style="background:#FFF5CC;border-color:#C8A84B"></div> ESC (cross-institutional)</div>
+      <div class="leg"><div class="sw" style="background:#2A7A6F"></div> Academic Lead / MOC (operational)</div>
+      <div class="leg"><div class="sw" style="background:#4A3D8F"></div> Nkabom Secretariat</div>
+      <div class="leg"><div class="sw" style="background:#D6EDDA;border-color:#2A6B3A"></div> Pillar Co-Leads (cross-faculty)</div>
+      <div class="leg"><div class="sw" style="background:#FEF3E2;border-color:#D97706"></div> Finance Coordination Group</div>
+      <div class="leg"><div class="sw" style="background:#F2F4F7;border-color:#9CA3AF"></div> Admin Asst / M&amp;E &amp; Communications (support)</div>
+      <div class="leg"><div class="sw" style="background:#F9DBDB;border-color:#991919"></div> KNUST (direct MCF funding)</div>
+      <div class="leg">
+        <div style="width:28px;height:2.5px;background:#1B3A6B;flex-shrink:0"></div> Line authority / reports to
+      </div>
+      <div class="leg">
+        <div style="width:28px;height:2.5px;
+          background:repeating-linear-gradient(90deg,#2A7A6F 0,#2A7A6F 5px,transparent 5px,transparent 9px);
+          flex-shrink:0"></div> Coordination ⇌
+      </div>
+    </div>
+
+  </div><!-- /body -->
+</div><!-- /wrap -->
+
+<script>
+function toggle(){
+  var b = document.getElementById('mczbody');
+  var btn = document.getElementById('tbtn');
+  if(b.classList.contains('hidden')){
+    b.classList.remove('hidden');
+    btn.textContent = '▲ Hide';
+  } else {
+    b.classList.add('hidden');
+    btn.textContent = '▼ Show';
+  }
+}
+</script>
+</body>
+</html>
