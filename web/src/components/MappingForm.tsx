@@ -30,9 +30,9 @@ type ActivityDraft = {
   outputs: string;
 };
 
-function newActivity(): ActivityDraft {
+function blankActivity(id: string): ActivityDraft {
   return {
-    id: crypto.randomUUID(),
+    id,
     title: "",
     themes: [],
     status: "",
@@ -65,7 +65,9 @@ export function MappingForm({
   const [department, setDepartment] = useState("");
   const [position, setPosition] = useState("");
   const [submissionDate, setSubmissionDate] = useState(today);
-  const [activities, setActivities] = useState<ActivityDraft[]>([newActivity()]);
+  const [activities, setActivities] = useState<ActivityDraft[]>(() => [
+    blankActivity("activity-1"),
+  ]);
   const [resources, setResources] = useState("");
   const [collaborations, setCollaborations] = useState("");
   const [challenges, setChallenges] = useState("");
@@ -564,7 +566,12 @@ export function MappingForm({
         ))}
         <button
           type="button"
-          onClick={() => setActivities((list) => [...list, newActivity()])}
+          onClick={() =>
+            setActivities((list) => [
+              ...list,
+              blankActivity(crypto.randomUUID()),
+            ])
+          }
           className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-[#2563a8] bg-white py-3 text-sm font-bold text-[#2563a8] transition-colors hover:bg-[#eef3fa]"
         >
           <span aria-hidden="true" className="text-lg leading-none">+</span>
