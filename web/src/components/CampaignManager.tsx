@@ -240,7 +240,7 @@ export function CampaignManager({
                 invites.map((inv) => (
                   <tr key={inv.id} className="border-b border-slate-100">
                     <td className="py-3 pr-4">
-                      {inv.fullName || "—"}
+                      {inv.fullName || "-"}
                       <br />
                       <span className="text-xs text-slate-500">{inv.email || ""}</span>
                     </td>

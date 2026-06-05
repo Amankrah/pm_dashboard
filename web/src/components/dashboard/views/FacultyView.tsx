@@ -19,8 +19,7 @@ export function FacultyView() {
   if (filteredSubmissions.length === 0) {
     return (
       <div className="rounded-[10px] bg-white p-12 text-center shadow-sm">
-        <p className="text-4xl">🏛️</p>
-        <h4 className="mt-3 font-bold text-[#1e3a5f]">No submissions yet</h4>
+        <h4 className="font-bold text-[#1e3a5f]">No submissions yet</h4>
         <p className="mt-1 text-sm text-slate-500">Generate form links or import JSON submissions.</p>
       </div>
     );

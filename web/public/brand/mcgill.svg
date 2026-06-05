@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- PLACEHOLDER — replace with official McGill mark. Keep filename: mcgill.svg -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 60" role="img" aria-label="McGill University">
+  <rect width="220" height="60" fill="none"/>
+  <text x="0" y="38" font-family="Georgia, 'Times New Roman', serif" font-size="34" font-weight="700" fill="#ed1b2f" letter-spacing="-0.5">McGill</text>
+  <text x="0" y="54" font-family="Helvetica, Arial, sans-serif" font-size="9" font-weight="600" fill="#1e3a5f" letter-spacing="2">UNIVERSITY</text>
+</svg>

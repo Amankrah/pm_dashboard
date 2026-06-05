@@ -52,7 +52,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       ok: true,
       submissionId: submission.id,
-      message: "Thank you — your activity mapping has been submitted.",
+      message: "Thank you. Your activity mapping has been submitted.",
     });
   } catch (err) {
     if (err instanceof z.ZodError) {

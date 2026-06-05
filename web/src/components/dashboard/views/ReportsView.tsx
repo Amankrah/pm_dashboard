@@ -5,10 +5,10 @@ import { useAnalytics } from "@/components/dashboard/AnalyticsProvider";
 import { generateReportHtml, openReportWindow } from "@/lib/analytics/reports";
 
 const REPORT_TYPES = [
-  { id: "monthly", icon: "📅", name: "Monthly", desc: "Single month summary" },
-  { id: "quarterly", icon: "📆", name: "Quarterly", desc: "Quarter progress" },
-  { id: "annual", icon: "🗓️", name: "Annual", desc: "Full year report" },
-  { id: "overall", icon: "🌐", name: "Overall", desc: "All periods" },
+  { id: "monthly", name: "Monthly", desc: "Single month summary" },
+  { id: "quarterly", name: "Quarterly", desc: "Quarter progress" },
+  { id: "annual", name: "Annual", desc: "Full year report" },
+  { id: "overall", name: "Overall", desc: "All periods" },
 ];
 
 export function ReportsView() {
@@ -27,7 +27,7 @@ export function ReportsView() {
     );
     openReportWindow(html);
     const today = new Date().toLocaleDateString("en-CA");
-    const title = `${REPORT_TYPES.find((t) => t.id === reportType)?.name ?? "Report"} — ${reportPeriod}`;
+    const title = `${REPORT_TYPES.find((t) => t.id === reportType)?.name ?? "Report"} · ${reportPeriod}`;
     setHistory((h) => [{ title, generated: today, html }, ...h].slice(0, 10));
   }
 
@@ -47,8 +47,7 @@ export function ReportsView() {
                   : "border-slate-200 hover:border-[#2563a8]"
               }`}
             >
-              <div className="text-2xl">{t.icon}</div>
-              <div className="mt-1 text-sm font-bold text-[#1e3a5f]">{t.name}</div>
+              <div className="text-sm font-bold text-[#1e3a5f]">{t.name}</div>
               <div className="mt-0.5 text-[11px] text-slate-500">{t.desc}</div>
             </button>
           ))}
@@ -81,7 +80,7 @@ export function ReportsView() {
           </button>
         </div>
         <p className="mt-3 text-xs text-slate-500">
-          Opens a printable window — use Print → Save as PDF. Report period is independent of the topbar filter unless you match them.
+          Opens a printable window. Use Print, then Save as PDF. Report period is independent of the topbar filter unless you match them.
         </p>
       </div>
 
@@ -95,7 +94,6 @@ export function ReportsView() {
               key={i}
               className="flex items-center gap-3 border-b border-slate-100 px-5 py-3 text-sm last:border-0"
             >
-              <span>📄</span>
               <div className="flex-1">
                 <p className="font-semibold">{r.title}</p>
                 <p className="text-[11px] text-slate-500">{r.generated}</p>

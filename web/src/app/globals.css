@@ -18,11 +18,48 @@ body {
   width: 100%;
   border-radius: 0.5rem;
   border: 1px solid #e2e8f0;
-  padding: 0.5rem 0.75rem;
+  background: #ffffff;
+  padding: 0.55rem 0.75rem;
   font-size: 0.875rem;
+  color: #0f172a;
+  transition:
+    border-color 120ms ease,
+    box-shadow 120ms ease,
+    background-color 120ms ease;
+}
+
+.input::placeholder {
+  color: #94a3b8;
+}
+
+.input:hover {
+  border-color: #cbd5e1;
 }
 
 .input:focus {
-  outline: 2px solid rgba(37, 99, 168, 0.3);
+  outline: none;
   border-color: #2563a8;
+  box-shadow: 0 0 0 3px rgba(37, 99, 168, 0.18);
+}
+
+.input:disabled,
+.input[aria-disabled="true"] {
+  background: #f1f5f9;
+  color: #64748b;
+  cursor: not-allowed;
+}
+
+select.input {
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%2364748b'><path d='M5.5 7.5l4.5 4.5 4.5-4.5' stroke='%2364748b' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' fill='none'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 0.6rem center;
+  background-size: 1.1rem 1.1rem;
+  padding-right: 2.1rem;
+}
+
+textarea.input {
+  resize: vertical;
+  min-height: 4.5rem;
+  line-height: 1.5;
 }

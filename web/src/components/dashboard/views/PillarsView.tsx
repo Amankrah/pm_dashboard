@@ -35,7 +35,7 @@ export function PillarsView() {
           <div key={key} className="overflow-hidden rounded-[10px] bg-white shadow-sm">
             <div className={`flex items-center justify-between bg-gradient-to-br ${headerGrad} px-5 py-4 text-white`}>
               <div>
-                <p className="text-base font-extrabold">{m.icon} {key}</p>
+                <p className="text-base font-extrabold">{key}</p>
                 <p className="mt-0.5 text-xs opacity-75">{m.desc.slice(0, 80)}…</p>
               </div>
               <div className="text-right">
@@ -93,7 +93,7 @@ export function PillarsView() {
                       <div>
                         <p className="text-xs font-semibold">{a.title}</p>
                         <p className="text-[11px] text-slate-500">
-                          {FAC_SHORT[a.submission.faculty]} — {a.submission.fullName}
+                          {FAC_SHORT[a.submission.faculty]} · {a.submission.fullName}
                           {a.partnerInstitution ? ` · ${a.partnerInstitution}` : ""}
                         </p>
                       </div>

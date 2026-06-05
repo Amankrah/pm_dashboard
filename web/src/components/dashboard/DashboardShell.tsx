@@ -2,30 +2,43 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { McGillMark } from "@/components/brand/Brand";
 import { useAnalytics } from "@/components/dashboard/AnalyticsProvider";
 import { periodLabel } from "@/lib/analytics/periods";
 
 const NAV = [
-  { section: "Monitoring", items: [
-    { href: "/dashboard", label: "Overview", icon: "📊" },
-    { href: "/dashboard/activities", label: "Activity Map", icon: "🗺️" },
-  ]},
-  { section: "Breakdown", items: [
-    { href: "/dashboard/faculty", label: "By Faculty", icon: "🏛️" },
-    { href: "/dashboard/pillars", label: "By Pillar", icon: "🎯" },
-    { href: "/dashboard/partners", label: "By Partner", icon: "🤝" },
-    { href: "/dashboard/synergies", label: "Synergies", icon: "✨" },
-  ]},
-  { section: "Planning & Reports", items: [
-    { href: "/dashboard/targets", label: "Targets", icon: "📈" },
-    { href: "/dashboard/compare", label: "Compare Periods", icon: "⚖️" },
-    { href: "/dashboard/reports", label: "Reports", icon: "📄" },
-  ]},
-  { section: "Data", items: [
-    { href: "/dashboard/campaigns", label: "Campaigns & links", icon: "🔗" },
-    { href: "/dashboard/submissions", label: "Submissions", icon: "📋" },
-    { href: "/dashboard/settings", label: "Notifications", icon: "✉️" },
-  ]},
+  {
+    section: "Monitoring",
+    items: [
+      { href: "/dashboard", label: "Overview" },
+      { href: "/dashboard/activities", label: "Activity Map" },
+    ],
+  },
+  {
+    section: "Breakdown",
+    items: [
+      { href: "/dashboard/faculty", label: "By Faculty" },
+      { href: "/dashboard/pillars", label: "By Pillar" },
+      { href: "/dashboard/partners", label: "By Partner" },
+      { href: "/dashboard/synergies", label: "Synergies" },
+    ],
+  },
+  {
+    section: "Planning & Reports",
+    items: [
+      { href: "/dashboard/targets", label: "Targets" },
+      { href: "/dashboard/compare", label: "Compare Periods" },
+      { href: "/dashboard/reports", label: "Reports" },
+    ],
+  },
+  {
+    section: "Data",
+    items: [
+      { href: "/dashboard/campaigns", label: "Campaigns & Links" },
+      { href: "/dashboard/submissions", label: "Submissions" },
+      { href: "/dashboard/settings", label: "Notifications" },
+    ],
+  },
 ];
 
 export function DashboardShell({
@@ -51,9 +64,13 @@ export function DashboardShell({
     <div className="flex min-h-screen">
       <aside className="fixed left-0 top-0 z-40 flex h-screen w-[238px] flex-col overflow-y-auto bg-gradient-to-b from-[#152c47] to-[#1e3a5f] text-white">
         <div className="border-b border-white/10 px-5 py-5">
-          <div className="text-2xl">🤝</div>
-          <div className="mt-1 text-sm font-extrabold leading-tight">Nkabom Collaborative</div>
-          <div className="text-[10px] tracking-wide text-white/55">Academic Lead Dashboard</div>
+          <McGillMark variant="dark" height={28} />
+          <div className="mt-3 text-sm font-extrabold leading-tight">
+            Nkabom Collaborative
+          </div>
+          <div className="text-[10px] tracking-wide text-white/55">
+            Academic Lead Dashboard
+          </div>
         </div>
         <nav className="flex-1 py-3">
           {NAV.map((group) => (
@@ -69,13 +86,12 @@ export function DashboardShell({
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`flex items-center gap-2.5 border-l-[3px] px-5 py-2 text-[12.5px] font-semibold transition-colors ${
+                    className={`block border-l-[3px] px-5 py-2 text-[12.5px] font-semibold transition-colors ${
                       active
                         ? "border-[#60a5fa] bg-[#2563a8]/30 text-white"
                         : "border-transparent text-white/70 hover:bg-white/8 hover:text-white"
                     }`}
                   >
-                    <span className="w-5 text-center">{item.icon}</span>
                     {item.label}
                   </Link>
                 );

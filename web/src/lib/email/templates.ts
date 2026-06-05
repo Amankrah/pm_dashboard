@@ -26,7 +26,7 @@ export function submissionReceivedEmail(opts: {
   planned: number;
   dashboardUrl: string;
 }) {
-  const subject = `Nkabom Activity Mapping — ${opts.respondentName} — ${opts.faculty}`;
+  const subject = `Nkabom Activity Mapping · ${opts.respondentName} · ${opts.faculty}`;
   const html = layout(`
 <p>A new faculty activity mapping has been submitted to the programme database.</p>
 <table style="width:100%;font-size:13px;margin:16px 0;border-collapse:collapse">
@@ -46,7 +46,7 @@ export function respondentConfirmationEmail(opts: {
   periodLabel: string;
   activityCount: number;
 }) {
-  const subject = `Confirmation — Nkabom Activity Mapping received`;
+  const subject = `Confirmation: Nkabom Activity Mapping received`;
   const html = layout(`
 <p>Dear ${opts.name},</p>
 <p>Thank you for submitting your Nkabom Collaborative faculty activity mapping for <strong>${opts.periodLabel}</strong>.</p>
@@ -64,20 +64,20 @@ export function inviteEmail(opts: {
 }) {
   const link = inviteLink(opts.token);
   const greeting = opts.recipientName ? `Dear ${opts.recipientName},` : "Dear colleague,";
-  const subject = `Nkabom Faculty Activity Mapping — ${opts.periodLabel}`;
+  const subject = `Nkabom Faculty Activity Mapping · ${opts.periodLabel}`;
   const html = layout(`
 <p>${greeting}</p>
 <p>Please complete the <strong>Nkabom Faculty Activity Mapping Form</strong> for <strong>${opts.periodLabel}</strong>.
 ${opts.faculty ? ` This link is associated with <strong>${opts.faculty}</strong>.` : ""}</p>
 <p style="margin:20px 0"><a href="${link}" style="display:inline-block;background:#1a6b44;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700">Open mapping form</a></p>
 <p style="font-size:12px;color:#64748b;word-break:break-all">Or copy this link: ${link}</p>
-<p style="font-size:12px;color:#64748b">The form saves directly to the programme database — no email attachment required.</p>
+<p style="font-size:12px;color:#64748b">The form saves directly to the programme database. No email attachment required.</p>
 `);
   return { subject, html, link };
 }
 
 export function testEmail() {
-  const subject = "Nkabom Activity Map — test notification";
+  const subject = "Nkabom Activity Map: test notification";
   const html = layout(`
 <p>This is a test email from the Nkabom Faculty Activity Map application.</p>
 <p>If you received this message, SMTP is configured correctly.</p>

@@ -19,8 +19,7 @@ export function PartnersView() {
   if (partners.length === 0) {
     return (
       <div className="col-span-2 rounded-[10px] bg-white p-12 text-center shadow-sm">
-        <p className="text-4xl">🤝</p>
-        <h4 className="mt-3 font-bold text-[#1e3a5f]">No partner data yet</h4>
+        <h4 className="font-bold text-[#1e3a5f]">No partner data yet</h4>
       </div>
     );
   }
@@ -45,7 +44,7 @@ export function PartnersView() {
           return (
             <div key={p} className="overflow-hidden rounded-[10px] bg-white shadow-sm">
               <div className="bg-gradient-to-br from-[#152c47] to-[#2563a8] px-4 py-3.5 text-white">
-                <p className="text-sm font-bold">🏛️ {p}</p>
+                <p className="text-sm font-bold">{p}</p>
                 <p className="text-[11px] text-white/70">
                   {pActs.length} activities · {Object.keys(byMember).length} faculty members
                 </p>
@@ -63,7 +62,7 @@ export function PartnersView() {
                       </p>
                       {m.acts.map((a) => (
                         <p key={a.id} className="text-slate-500">
-                          {a.title} — <StatusDot status={a.status} />
+                          {a.title} · <StatusDot status={a.status} />
                         </p>
                       ))}
                     </div>

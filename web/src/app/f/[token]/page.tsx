@@ -1,3 +1,4 @@
+import { BrandLockup } from "@/components/brand/Brand";
 import { MappingForm } from "@/components/MappingForm";
 import { FormHeader } from "@/components/form/FormHeader";
 import { PillarDefinitions } from "@/components/form/PillarDefinitions";
@@ -47,10 +48,10 @@ export default async function PublicFormPage({
   }
 
   return (
-    <div className="min-h-screen bg-[#edf1f7]">
+    <div className="flex min-h-screen flex-col bg-[#edf1f7]">
       <FormHeader periodLabel={invite.period.label} />
       <PillarDefinitions />
-      <div className="mx-auto max-w-3xl px-4 py-8">
+      <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8">
         <MappingForm
           token={token}
           periodLabel={invite.period.label}
@@ -60,15 +61,40 @@ export default async function PublicFormPage({
             faculty: invite.faculty,
           }}
         />
-      </div>
+      </main>
+      <FormFooter />
     </div>
+  );
+}
+
+function FormFooter() {
+  return (
+    <footer className="border-t border-slate-200 bg-white">
+      <div className="mx-auto flex max-w-3xl flex-col items-center gap-4 px-6 py-6 sm:flex-row sm:justify-between">
+        <BrandLockup variant="light" height={28} />
+        <p className="text-center text-[11px] leading-relaxed text-slate-500 sm:text-right">
+          Nkabom Collaborative · Academic Lead Office, McGill University
+          <br />
+          Questions? Contact{" "}
+          <a
+            className="font-semibold text-[#1e3a5f] underline-offset-2 hover:underline"
+            href="mailto:ebenezer.kwofie@mcgill.ca"
+          >
+            ebenezer.kwofie@mcgill.ca
+          </a>
+        </p>
+      </div>
+    </footer>
   );
 }
 
 function FormMessage({ title, body }: { title: string; body: string }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#edf1f7] p-6">
-      <div className="max-w-md rounded-xl bg-white p-8 text-center shadow-md">
+      <div className="max-w-md rounded-xl bg-white p-8 text-center shadow-md ring-1 ring-slate-200">
+        <div className="mx-auto mb-5">
+          <BrandLockup variant="light" height={28} className="justify-center" />
+        </div>
         <h1 className="text-xl font-bold text-[#1e3a5f]">{title}</h1>
         <p className="mt-3 text-sm text-slate-600">{body}</p>
       </div>

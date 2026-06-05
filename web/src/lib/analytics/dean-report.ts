@@ -33,7 +33,7 @@ export function generateDeanReportHtml(
       const mActs = filterByPeriod(s.activities, period);
       const mDone = mActs.filter((a) => a.status === "Completed").length;
       const mPillars = [...new Set(mActs.flatMap((a) => a.themes))].join(", ");
-      return `<tr><td>${s.fullName}</td><td>${s.position || "—"}</td><td style="text-align:center">${mActs.length}</td><td style="text-align:center;color:#15803d;font-weight:700">${mDone}</td><td>${mPillars || "—"}</td></tr>`;
+      return `<tr><td>${s.fullName}</td><td>${s.position || "-"}</td><td style="text-align:center">${mActs.length}</td><td style="text-align:center;color:#15803d;font-weight:700">${mDone}</td><td>${mPillars || "-"}</td></tr>`;
     })
     .join("");
 
@@ -45,7 +45,7 @@ export function generateDeanReportHtml(
           : a.status === "Ongoing"
             ? "#a05c00"
             : "#1e3a5f";
-      return `<tr><td>${a.title}</td><td>${a.submission.fullName}</td><td>${a.themes.join(", ")}</td><td style="color:${sc};font-weight:600">${a.status}</td><td>${a.partnerInstitution || "—"}</td></tr>`;
+      return `<tr><td>${a.title}</td><td>${a.submission.fullName}</td><td>${a.themes.join(", ")}</td><td style="color:${sc};font-weight:600">${a.status}</td><td>${a.partnerInstitution || "-"}</td></tr>`;
     })
     .join("");
 
@@ -62,7 +62,7 @@ export function generateDeanReportHtml(
     )
     .join("");
 
-  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${fk} Dean Report — ${periodLbl}</title><style>
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${fk} Dean Report · ${periodLbl}</title><style>
 body{font-family:'Segoe UI',Arial,sans-serif;max-width:880px;margin:0 auto;padding:40px;color:#1a202c}
 .cover{background:linear-gradient(135deg,#152c47,#1e3a5f);color:#fff;padding:36px;border-radius:12px;margin-bottom:32px}
 .cover-sub{font-size:12px;opacity:0.6;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
@@ -75,7 +75,7 @@ table{width:100%;border-collapse:collapse;font-size:12.5px}th{background:#1e3a5f
 <div class="cover">
 <div class="cover-sub">Nkabom Africa–Agrifood Collaborative · McGill University</div>
 <h1>${FAC_FULL_NAMES[fk]} (${fk})</h1>
-<h2>Nkabom Collaborative Activity Report — ${periodLbl} · Generated ${today}</h2>
+<h2>Nkabom Collaborative Activity Report · ${periodLbl} · Generated ${today}</h2>
 <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-top:12px">${coverStats}</div>
 </div>
 <div class="section"><h3>Executive Summary</h3>

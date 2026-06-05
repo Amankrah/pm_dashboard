@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- PLACEHOLDER — replace with official Mastercard Foundation mark. Keep filename: mastercard-foundation.svg -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 60" role="img" aria-label="Mastercard Foundation">
+  <rect width="320" height="60" fill="none"/>
+  <text x="0" y="30" font-family="Helvetica, Arial, sans-serif" font-size="22" font-weight="700" fill="#1e3a5f" letter-spacing="-0.2">Mastercard</text>
+  <text x="0" y="52" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="400" fill="#1e3a5f" letter-spacing="0.5">Foundation</text>
+</svg>

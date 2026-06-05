@@ -1,35 +1,40 @@
+import { BrandLockup } from "@/components/brand/Brand";
 import { PILLARS } from "@/lib/constants";
 
 export function FormHeader({ periodLabel }: { periodLabel: string }) {
   return (
-    <>
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-gradient-to-br from-[#152c47] via-[#1e3a5f] to-[#1e4d7a] text-white shadow-md">
-        <div className="mx-auto max-w-3xl px-6 py-8">
-          <div className="flex items-start gap-3">
-            <div className="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-xl bg-[#e8a020] text-2xl">
-              🤝
-            </div>
-            <div>
-              <p className="text-[11px] uppercase tracking-[0.2em] text-white/75">
-                Mastercard Foundation · McGill University
-              </p>
-              <p className="text-lg font-bold">Nkabom Collaborative</p>
-            </div>
-          </div>
-          <h1 className="mt-5 text-[26px] font-bold leading-tight">
-            Faculty Activity Mapping Form
-          </h1>
-          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/85">
-            This form captures collaborative activities across the four Nkabom themes.
-            Your responses help harmonize engagement across McGill faculties and partner
-            institutions in Ghana.
+    <header className="border-b border-slate-200 bg-white">
+      <div className="border-b border-slate-200">
+        <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-6 py-4">
+          <BrandLockup variant="light" height={40} />
+          <span className="hidden text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 sm:inline">
+            Nkabom Collaborative
+          </span>
+        </div>
+      </div>
+
+      <div className="bg-gradient-to-br from-[#152c47] via-[#1e3a5f] to-[#1e4d7a] text-white">
+        <div className="mx-auto max-w-3xl px-6 py-9">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/70">
+            Faculty Activity Mapping
           </p>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <span className="rounded-full bg-white/15 px-3 py-1 text-xs">
-              McGill University — Academic Lead Office
+          <h1 className="mt-2 text-[28px] font-bold leading-tight">
+            Tell us what you’re working on this period
+          </h1>
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/85">
+            This short form captures collaborative activities across the four Nkabom
+            themes. Your responses help harmonize engagement across McGill faculties
+            and partner institutions in Ghana.
+          </p>
+          <div className="mt-5 flex flex-wrap gap-2">
+            <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs text-white/90">
+              McGill University · Academic Lead Office
             </span>
-            <span className="rounded-full bg-white/15 px-3 py-1 text-xs">
+            <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs text-white/90">
               {periodLabel}
+            </span>
+            <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs text-white/90">
+              About 5 to 10 minutes
             </span>
           </div>
         </div>
@@ -52,7 +57,7 @@ export function FormHeader({ periodLabel }: { periodLabel: string }) {
             ))}
           </div>
         </div>
-      </header>
-    </>
+      </div>
+    </header>
   );
 }

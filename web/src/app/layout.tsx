@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Nkabom Activity Map",
   description:
-    "Nkabom Collaborative — faculty activity mapping and programme dashboard",
+    "Nkabom Collaborative faculty activity mapping and programme dashboard",
 };
 
 export default function RootLayout({

@@ -48,7 +48,7 @@ export async function sendMail(input: SendMailInput): Promise<{
 
   if (!config || toList.length === 0) {
     const msg = !config
-      ? "SMTP not configured — notification logged only."
+      ? "SMTP not configured. Notification logged only."
       : "No recipients.";
     console.info("[email:skipped]", input.type, input.subject, msg);
     await logNotification(input, "skipped", msg);

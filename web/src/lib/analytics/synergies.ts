@@ -10,7 +10,7 @@ export function computeSynergies(acts: FlatActivity[]): SynergyItem[] {
       items.push({
         type: "cross-pillar",
         title: a.title,
-        detail: `Spans ${a.themes.join(" + ")} — ${FAC_SHORT[a.submission.faculty] || a.submission.faculty}, ${a.submission.fullName}`,
+        detail: `Spans ${a.themes.join(" + ")} · ${FAC_SHORT[a.submission.faculty] || a.submission.faculty}, ${a.submission.fullName}`,
         activities: [a.id],
       });
     });

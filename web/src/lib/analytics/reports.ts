@@ -32,11 +32,11 @@ export function generateReportHtml(
   const actDetails = filtered
     .map(
       (a) =>
-        `<tr><td>${a.title}</td><td>${FAC_SHORT[a.submission.faculty] || a.submission.faculty}</td><td>${a.themes.join(", ")}</td><td style="font-weight:600">${a.status}</td><td>${a.partnerInstitution || "—"}</td></tr>`,
+        `<tr><td>${a.title}</td><td>${FAC_SHORT[a.submission.faculty] || a.submission.faculty}</td><td>${a.themes.join(", ")}</td><td style="font-weight:600">${a.status}</td><td>${a.partnerInstitution || "-"}</td></tr>`,
     )
     .join("");
 
-  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${typeLabel[reportType] ?? "Report"} — ${label}</title>
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${typeLabel[reportType] ?? "Report"} · ${label}</title>
 <style>body{font-family:'Segoe UI',Arial,sans-serif;max-width:900px;margin:0 auto;padding:40px;color:#1a202c}
 .cover{background:linear-gradient(135deg,#152c47,#1e3a5f);color:#fff;padding:40px;border-radius:12px;margin-bottom:32px}
 .cover h1{font-size:22px;font-weight:800;margin:0 0 6px}.cover h2{font-size:15px;font-weight:400;opacity:0.75}

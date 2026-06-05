@@ -80,7 +80,7 @@ export function CompareView() {
             onChange={(e) => setPeriodA(e.target.value)}
             className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
           >
-            <option value="">— Select —</option>
+            <option value="">Select a period…</option>
             {options.map((o) => (
               <option key={o.value} value={o.value}>{o.label}</option>
             ))}
@@ -102,7 +102,7 @@ export function CompareView() {
             onChange={(e) => setPeriodB(e.target.value)}
             className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
           >
-            <option value="">— Select —</option>
+            <option value="">Select a period…</option>
             {options.map((o) => (
               <option key={o.value} value={o.value}>{o.label}</option>
             ))}

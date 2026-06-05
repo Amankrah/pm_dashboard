@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useAnalytics } from "@/components/dashboard/AnalyticsProvider";
 import { ThemeTag } from "@/components/dashboard/ThemeTag";
-import { PILLARS, PILLAR_META } from "@/lib/constants";
+import { PILLARS } from "@/lib/constants";
 import { pillarStats } from "@/lib/analytics/metrics-core";
 import {
   filterByPeriod,
@@ -69,11 +69,10 @@ function TargetPeriodEditor({
   return (
     <div className="overflow-hidden rounded-[10px] bg-white shadow-sm">
       <div className="flex items-center justify-between bg-[#1e3a5f] px-5 py-3 text-sm font-bold text-white">
-        <span>Activity completion targets — {label}</span>
+        <span>Activity completion targets · {label}</span>
       </div>
       <div className="space-y-4 p-5">
         {PILLARS.map((key) => {
-          const m = PILLAR_META[key];
           const { done, tot } = pillarStats(acts2, key);
           const tgt = values[key] ?? 0;
           const pct = tgt > 0 ? Math.min(100, Math.round((done / tgt) * 100)) : 0;
@@ -82,7 +81,7 @@ function TargetPeriodEditor({
               key={key}
               className="grid items-center gap-3 border-b border-slate-100 pb-4 last:border-0 sm:grid-cols-[1fr_100px_60px_60px_1fr]"
             >
-              <ThemeTag theme={`${m.icon} ${key}`} />
+              <ThemeTag theme={key} />
               <div>
                 <label
                   htmlFor={`target-${activeTab}-${key}`}
@@ -181,10 +180,9 @@ export function TargetsView() {
 
   return (
     <div className="space-y-5">
-      <div className="flex gap-4 rounded-[10px] bg-white p-5 shadow-sm">
-        <span className="text-4xl">📈</span>
+      <div className="rounded-[10px] border-l-4 border-l-[#2563a8] bg-white p-5 shadow-sm">
         <div>
-          <h3 className="font-extrabold text-[#1e3a5f]">Target setting & progress</h3>
+          <h3 className="font-extrabold text-[#1e3a5f]">Target setting and progress</h3>
           <p className="mt-1 text-xs text-slate-500 leading-relaxed">
             Set completed-activity targets per pillar. Progress bars on Overview use the global
             period filter; targets here use the tab period.

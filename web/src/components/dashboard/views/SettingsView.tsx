@@ -70,12 +70,12 @@ export function SettingsView({ isAdmin }: { isAdmin: boolean }) {
           <div>
             <span className="text-xs font-bold uppercase text-slate-500">Status</span>
             <p className={`mt-1 font-semibold ${smtpConfigured ? "text-[#15803d]" : "text-amber-700"}`}>
-              {smtpConfigured ? "Configured" : "Not configured — notifications are logged only"}
+              {smtpConfigured ? "Configured" : "Not configured. Notifications are logged only."}
             </p>
           </div>
           <div>
             <span className="text-xs font-bold uppercase text-slate-500">Notify on submit</span>
-            <p className="mt-1">{notifyTo.join(", ") || "—"}</p>
+            <p className="mt-1">{notifyTo.join(", ") || "Not set"}</p>
             {notifyCc.length > 0 && (
               <p className="text-xs text-slate-500">CC: {notifyCc.join(", ")}</p>
             )}

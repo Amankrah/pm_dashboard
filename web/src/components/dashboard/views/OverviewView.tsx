@@ -16,19 +16,16 @@ export function OverviewView() {
     <div className="space-y-5">
       <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
         {[
-          { label: "Faculty Submissions", value: filteredSubmissions.length, sub: `of ${FACULTIES.length} faculties`, border: "#1e5fa8", icon: "👤" },
-          { label: "Activities Completed", value: stats.completed, sub: `of ${stats.total} total`, border: "#15803d", icon: "✅" },
-          { label: "Activities Ongoing", value: stats.ongoing, sub: "in progress", border: "#a05c00", icon: "⚡" },
-          { label: "Partners Engaged", value: partners, sub: "Ghanaian institutions", border: "#1e3a5f", icon: "🏛️" },
+          { label: "Faculty Submissions", value: filteredSubmissions.length, sub: `of ${FACULTIES.length} faculties`, border: "#1e5fa8" },
+          { label: "Activities Completed", value: stats.completed, sub: `of ${stats.total} total`, border: "#15803d" },
+          { label: "Activities Ongoing", value: stats.ongoing, sub: "in progress", border: "#a05c00" },
+          { label: "Partners Engaged", value: partners, sub: "Ghanaian institutions", border: "#1e3a5f" },
         ].map((c) => (
           <div
             key={c.label}
-            className="relative overflow-hidden rounded-[10px] border-t-4 bg-white p-5 shadow-sm"
+            className="rounded-[10px] border-t-4 bg-white p-5 shadow-sm"
             style={{ borderTopColor: c.border }}
           >
-            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-3xl opacity-[0.08]">
-              {c.icon}
-            </span>
             <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">{c.label}</p>
             <p className="mt-1 text-3xl font-extrabold">{c.value}</p>
             <p className="mt-0.5 text-[11px] text-slate-500">{c.sub}</p>
@@ -77,7 +74,7 @@ export function OverviewView() {
               style={{ borderTopColor: m.color }}
             >
               <p className="text-sm font-extrabold" style={{ color: m.color }}>
-                {m.icon} {key}
+                {key}
               </p>
               <p className="mb-2 text-[11px] text-slate-500">{m.short}</p>
               <div className="mb-3 flex gap-3">

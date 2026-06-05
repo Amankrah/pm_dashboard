@@ -8,26 +8,36 @@ export type Pillar = (typeof PILLARS)[number];
 
 export const PILLAR_META: Record<
   Pillar,
-  { cls: string; icon: string; color: string; short: string; desc: string }
+  {
+    cls: string;
+    abbr: string;
+    color: string;
+    bgClass: string;
+    short: string;
+    desc: string;
+  }
 > = {
   Education: {
     cls: "edu",
-    icon: "📚",
+    abbr: "Ed",
     color: "#1e5fa8",
+    bgClass: "bg-[#1e5fa8]",
     short: "Building Skills and Knowledge",
     desc: "Building agricultural skills and academic knowledge to strengthen capacity across Ghana and Canada.",
   },
   "Access and Success": {
     cls: "acc",
-    icon: "🌱",
+    abbr: "Ac",
     color: "#1a6b44",
+    bgClass: "bg-[#1a6b44]",
     short: "Expanding Opportunities",
     desc: "Expanding access to higher education and professional opportunities for underserved communities.",
   },
   Entrepreneurship: {
     cls: "ent",
-    icon: "🚀",
+    abbr: "En",
     color: "#a05c00",
+    bgClass: "bg-[#a05c00]",
     short: "Driving Innovation and Impact",
     desc: "Driving innovation and enterprise development in the agri-food value chain.",
   },

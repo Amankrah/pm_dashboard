@@ -160,7 +160,7 @@ export function ActivityMapView() {
                   <td className="px-3.5 py-2.5 text-[11px]">{FAC_SHORT[a.submission.faculty] || a.submission.faculty}</td>
                   <td className="px-3.5 py-2.5">{a.themes.map((t) => <ThemeTag key={t} theme={t} />)}</td>
                   <td className="px-3.5 py-2.5"><StatusDot status={a.status} /></td>
-                  <td className="px-3.5 py-2.5 text-[11px]">{a.partnerInstitution || "—"}</td>
+                  <td className="px-3.5 py-2.5 text-[11px]">{a.partnerInstitution || "-"}</td>
                   <td className="whitespace-nowrap px-3.5 py-2.5 text-[11px]">
                     {a.startDate}{a.startDate && a.endDate ? " → " : ""}{a.endDate}
                   </td>
