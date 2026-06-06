@@ -36,7 +36,7 @@ const NAV = [
     items: [
       { href: "/dashboard/campaigns", label: "Campaigns & Links" },
       { href: "/dashboard/submissions", label: "Submissions" },
-      { href: "/dashboard/settings", label: "Notifications" },
+      { href: "/dashboard/settings", label: "Account & system" },
     ],
   },
 ];

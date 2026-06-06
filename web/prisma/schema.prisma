@@ -113,18 +113,3 @@ model PillarTarget {
 
   @@unique([periodKey, pillar])
 }
-
-model NotificationLog {
-  id        String   @id @default(cuid())
-  type      String
-  toAddress String
-  ccAddress String?
-  subject   String
-  status    String
-  error     String?
-  meta      String?
-  createdAt DateTime @default(now())
-
-  @@index([createdAt])
-  @@index([type])
-}

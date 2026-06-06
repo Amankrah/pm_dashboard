@@ -72,17 +72,9 @@ SEED_ADMIN_EMAIL="${SEED_ADMIN_EMAIL:-}"
 SESSION_SECRET="${SESSION_SECRET:-}"
 APP_PASSWORD="${APP_PASSWORD:-}"
 
-# SMTP (optional - leave empty to disable email; submissions still work
-# and notifications are logged as 'skipped' in NotificationLog).
-SMTP_HOST="${SMTP_HOST:-}"
-SMTP_PORT="${SMTP_PORT:-587}"
-SMTP_SECURE="${SMTP_SECURE:-false}"
-SMTP_USER="${SMTP_USER:-}"
-SMTP_PASS="${SMTP_PASS:-}"
-SMTP_FROM="${SMTP_FROM:-ebenezer.kwofie@mcgill.ca}"
-NOTIFY_TO="${NOTIFY_TO:-ebenezer.kwofie@mcgill.ca}"
-NOTIFY_CC="${NOTIFY_CC:-}"
-NOTIFY_RESPONDENT="${NOTIFY_RESPONDENT:-false}"
+# NOTE: this deployment does not use server-side SMTP. All outbound mail is
+# composed in the operator's McGill Outlook via mailto links. No SMTP_* /
+# NOTIFY_* variables are written to .env.
 
 # Memory watchdog threshold (MB). Next.js + SQLite is tiny; on a 2GB box
 # anything below ~200MB available is worth a restart.
@@ -439,17 +431,8 @@ SESSION_SECRET="$SESSION_SECRET"
 # Public URL for invite links
 NEXT_PUBLIC_APP_URL="https://$DOMAIN"
 
-# --- Email (leave SMTP_HOST empty to disable; submissions still work) ---
-SMTP_HOST="$SMTP_HOST"
-SMTP_PORT="$SMTP_PORT"
-SMTP_SECURE="$SMTP_SECURE"
-SMTP_USER="$SMTP_USER"
-SMTP_PASS="$SMTP_PASS"
-SMTP_FROM="$SMTP_FROM"
-
-NOTIFY_TO="$NOTIFY_TO"
-NOTIFY_CC="$NOTIFY_CC"
-NOTIFY_RESPONDENT="$NOTIFY_RESPONDENT"
+# Outbound mail: this deployment does not use SMTP. The dashboard generates
+# mailto links that open in the operator's McGill Outlook.
 
 NODE_ENV=production
 EOF

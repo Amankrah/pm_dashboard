@@ -178,8 +178,7 @@ export function MappingForm({
         </p>
         <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-slate-600">
           Your faculty activity mapping has been saved. The Academic Lead office
-          will review it on the programme dashboard. A confirmation may be sent
-          to your McGill email if enabled.
+          will review it on the programme dashboard.
         </p>
       </div>
     );
@@ -691,8 +690,8 @@ export function MappingForm({
           {loading ? "Submitting…" : "Submit my responses"}
         </button>
         <p className="text-center text-xs text-slate-500">
-          Your responses are saved directly to the Nkabom programme database. The
-          Academic Lead ({periodLabel}) will be notified.
+          Your responses are saved directly to the Nkabom programme database for
+          the {periodLabel} reporting period.
         </p>
       </div>
     </form>

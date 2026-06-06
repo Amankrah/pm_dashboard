@@ -39,16 +39,6 @@ export async function POST(request: Request) {
       payload,
     );
 
-    const { notifyNewSubmission } = await import("@/lib/email/notify");
-    notifyNewSubmission({
-      submissionId: submission.id,
-      fullName: payload.respondent.full_name,
-      email: payload.respondent.email,
-      faculty: payload.respondent.faculty,
-      periodLabel: invite.period.label,
-      activities: payload.activities.map((a) => ({ status: a.status })),
-    }).catch((err) => console.error("Notification error:", err));
-
     return NextResponse.json({
       ok: true,
       submissionId: submission.id,
