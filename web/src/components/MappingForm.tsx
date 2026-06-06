@@ -176,7 +176,7 @@ export function MappingForm({
         <p className="mt-1 text-xs font-semibold uppercase tracking-widest text-slate-500">
           {periodLabel}
         </p>
-        <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-slate-600">
+        <p className="mx-auto mt-4 max-w-md text-[15px] leading-relaxed text-slate-600">
           Your faculty activity mapping has been saved. The Academic Lead office
           will review it on the programme dashboard.
         </p>
@@ -313,7 +313,7 @@ export function MappingForm({
                 <span className="flex h-6 min-w-[1.5rem] items-center justify-center rounded-md bg-[#1e3a5f] px-1.5 text-[11px] font-bold text-white">
                   {idx + 1}
                 </span>
-                <h3 className="text-sm font-bold text-[#1e3a5f]">
+                <h3 className="text-[15px] font-bold text-[#1e3a5f]">
                   Activity {idx + 1}
                   {act.title ? `: ${act.title}` : ""}
                 </h3>
@@ -571,7 +571,7 @@ export function MappingForm({
               blankActivity(crypto.randomUUID()),
             ])
           }
-          className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-[#2563a8] bg-white py-3 text-sm font-bold text-[#2563a8] transition-colors hover:bg-[#eef3fa]"
+          className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-[#2563a8] bg-white py-3 text-[15px] font-bold text-[#2563a8] transition-colors hover:bg-[#eef3fa]"
         >
           <span aria-hidden="true" className="text-lg leading-none">+</span>
           Add another activity
@@ -654,7 +654,7 @@ export function MappingForm({
         title="Declaration"
         subtitle="Please confirm before submitting."
       >
-        <label className="flex cursor-pointer gap-3 rounded-lg border border-slate-200 bg-[#fafcff] p-4 text-sm leading-relaxed text-slate-700 hover:border-slate-300">
+        <label className="flex cursor-pointer gap-3 rounded-lg border border-slate-200 bg-[#fafcff] p-4 text-[15px] leading-relaxed text-slate-700 hover:border-slate-300">
           <input
             type="checkbox"
             required
@@ -675,7 +675,7 @@ export function MappingForm({
       {error && (
         <p
           role="alert"
-          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-[15px] text-red-700"
         >
           {error}
         </p>
@@ -685,11 +685,11 @@ export function MappingForm({
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-lg bg-gradient-to-r from-[#1a6b44] to-[#15803d] py-3.5 text-sm font-bold text-white shadow-sm transition-opacity hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
+          className="w-full rounded-lg bg-gradient-to-r from-[#1a6b44] to-[#15803d] py-4 text-[15px] font-bold text-white shadow-sm transition-opacity hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading ? "Submitting…" : "Submit my responses"}
         </button>
-        <p className="text-center text-xs text-slate-500">
+        <p className="text-center text-[13px] text-slate-500">
           Your responses are saved directly to the Nkabom programme database for
           the {periodLabel} reporting period.
         </p>
@@ -734,13 +734,13 @@ function SectionCard({
             {number}
           </div>
           <div className="min-w-0">
-            <p className="text-[10.5px] font-bold uppercase tracking-[0.18em] text-slate-500">
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">
               Section {number}
             </p>
-            <h2 className="text-base font-bold leading-snug text-[#1e3a5f]">
+            <h2 className="text-[17px] font-bold leading-snug text-[#1e3a5f]">
               {title}
             </h2>
-            <p className="mt-0.5 text-xs leading-relaxed text-slate-500">
+            <p className="mt-0.5 text-[13px] leading-relaxed text-slate-500">
               {subtitle}
             </p>
           </div>
@@ -763,11 +763,13 @@ function SubGroup({
   return (
     <div className="rounded-lg border border-slate-200 bg-white p-5">
       <div className="mb-4 border-b border-slate-100 pb-3">
-        <p className="text-[11px] font-bold uppercase tracking-wider text-[#1e3a5f]">
+        <p className="text-xs font-bold uppercase tracking-wider text-[#1e3a5f]">
           {title}
         </p>
         {hint && (
-          <p className="mt-1 text-xs leading-relaxed text-slate-500">{hint}</p>
+          <p className="mt-1 text-[13px] leading-relaxed text-slate-500">
+            {hint}
+          </p>
         )}
       </div>
       {children}
@@ -814,12 +816,14 @@ function Question({
       <div className={className}>
         <label
           htmlFor={fieldId}
-          className="mb-1 block text-sm font-semibold leading-snug text-[#1e293b]"
+          className="mb-1 block text-[15px] font-semibold leading-snug text-[#1e293b]"
         >
           {prompt}
         </label>
         {hint && (
-          <p className="mb-2 text-xs leading-relaxed text-slate-500">{hint}</p>
+          <p className="mb-2 text-[13px] leading-relaxed text-slate-500">
+            {hint}
+          </p>
         )}
         {cloneElement(
           child as React.ReactElement<
@@ -843,12 +847,14 @@ function Question({
     >
       <legend
         id={`${fieldId}-legend`}
-        className="mb-1 text-sm font-semibold leading-snug text-[#1e293b]"
+        className="mb-1 text-[15px] font-semibold leading-snug text-[#1e293b]"
       >
         {prompt}
       </legend>
       {hint && (
-        <p className="mb-2 text-xs leading-relaxed text-slate-500">{hint}</p>
+        <p className="mb-2 text-[13px] leading-relaxed text-slate-500">
+          {hint}
+        </p>
       )}
       {children}
     </fieldset>

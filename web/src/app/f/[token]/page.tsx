@@ -51,7 +51,7 @@ export default async function PublicFormPage({
     <div className="flex min-h-screen flex-col bg-[#edf1f7]">
       <FormHeader periodLabel={invite.period.label} />
       <PillarDefinitions />
-      <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8">
+      <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8">
         <MappingForm
           token={token}
           periodLabel={invite.period.label}
@@ -70,9 +70,9 @@ export default async function PublicFormPage({
 function FormFooter() {
   return (
     <footer className="border-t border-slate-200 bg-white">
-      <div className="mx-auto flex max-w-3xl flex-col items-center gap-4 px-6 py-6 sm:flex-row sm:justify-between">
+      <div className="mx-auto flex max-w-4xl flex-col items-center gap-4 px-6 py-6 sm:flex-row sm:justify-between">
         <BrandLockup variant="light" height={28} />
-        <p className="text-center text-[11px] leading-relaxed text-slate-500 sm:text-right">
+        <p className="text-center text-[13px] leading-relaxed text-slate-500 sm:text-right">
           Nkabom Collaborative · Academic Lead Office, McGill University
           <br />
           Questions? Contact{" "}

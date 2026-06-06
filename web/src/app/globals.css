@@ -19,8 +19,8 @@ body {
   border-radius: 0.5rem;
   border: 1px solid #e2e8f0;
   background: #ffffff;
-  padding: 0.55rem 0.75rem;
-  font-size: 0.875rem;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.9375rem;
   color: #0f172a;
   transition:
     border-color 120ms ease,

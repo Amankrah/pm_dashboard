@@ -24,11 +24,11 @@ const PILLAR_DESC: Record<string, string> = {
 export function PillarDefinitions() {
   return (
     <section className="border-t-[3px] border-[#1e3a5f] bg-[#f4f7fb] py-7">
-      <div className="mx-auto max-w-3xl px-4">
-        <h2 className="mb-4 border-l-4 border-[#1e3a5f] pl-3 text-[13px] font-bold uppercase tracking-wide text-[#1e3a5f]">
+      <div className="mx-auto max-w-4xl px-4">
+        <h2 className="mb-4 border-l-4 border-[#1e3a5f] pl-3 text-sm font-bold uppercase tracking-wide text-[#1e3a5f]">
           Nkabom strategic pillars
         </h2>
-        <p className="mb-5 text-sm text-slate-600">
+        <p className="mb-5 text-[15px] text-slate-600">
           When you describe each activity below, select the pillar or pillars that
           best describe how the work contributes to the collaborative. You may
           select more than one.
@@ -39,23 +39,23 @@ export function PillarDefinitions() {
             return (
               <div
                 key={key}
-                className={`rounded-[10px] border-t-4 bg-white p-4 shadow-sm ${PILLAR_CLASS[key]}`}
+                className={`rounded-[10px] border-t-4 bg-white p-5 shadow-sm ${PILLAR_CLASS[key]}`}
               >
                 <span
-                  className={`inline-flex h-7 w-7 items-center justify-center rounded-md text-[11px] font-bold text-white ${m.bgClass}`}
+                  className={`inline-flex h-7 w-7 items-center justify-center rounded-md text-xs font-bold text-white ${m.bgClass}`}
                   aria-hidden="true"
                 >
                   {m.abbr}
                 </span>
                 <h3
-                  className={`mt-2 text-[13px] font-extrabold ${PILLAR_TITLE_COLOR[key]}`}
+                  className={`mt-2 text-sm font-extrabold ${PILLAR_TITLE_COLOR[key]}`}
                 >
                   {key}
                 </h3>
-                <p className="text-[10.5px] font-semibold uppercase tracking-wide text-slate-500">
+                <p className="text-[11.5px] font-semibold uppercase tracking-wide text-slate-500">
                   {m.short}
                 </p>
-                <p className="mt-2 text-[11.5px] leading-relaxed text-slate-700">
+                <p className="mt-2 text-[13px] leading-relaxed text-slate-700">
                   {PILLAR_DESC[key]}
                 </p>
               </div>

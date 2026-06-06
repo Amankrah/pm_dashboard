@@ -7,7 +7,7 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-[#edf1f7] p-6">
       <div className="w-full max-w-md">
         <div className="mb-6 flex justify-center">
-          <BrandLockup variant="light" height={36} />
+          <BrandLockup variant="light" height={36} showPartners />
         </div>
         <div className="rounded-xl bg-white p-8 shadow-md ring-1 ring-slate-200">
           <div className="mb-6">

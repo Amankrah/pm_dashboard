@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { McGillMark } from "@/components/brand/Brand";
+import { NkabomMark } from "@/components/brand/Brand";
 import { useAnalytics } from "@/components/dashboard/AnalyticsProvider";
 import { periodLabel } from "@/lib/analytics/periods";
 
@@ -64,11 +64,8 @@ export function DashboardShell({
     <div className="flex min-h-screen">
       <aside className="fixed left-0 top-0 z-40 flex h-screen w-[238px] flex-col overflow-y-auto bg-gradient-to-b from-[#152c47] to-[#1e3a5f] text-white">
         <div className="border-b border-white/10 px-5 py-5">
-          <McGillMark variant="dark" height={28} />
-          <div className="mt-3 text-sm font-extrabold leading-tight">
-            Nkabom Collaborative
-          </div>
-          <div className="text-[10px] tracking-wide text-white/55">
+          <NkabomMark variant="dark" height={34} />
+          <div className="mt-3 text-[10px] tracking-wide text-white/55">
             Academic Lead Dashboard
           </div>
         </div>

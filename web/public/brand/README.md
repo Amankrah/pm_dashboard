@@ -4,6 +4,9 @@ Drop the official artwork here using these exact filenames so the UI picks them 
 
 | File | Used on | Recommended format | Notes |
 |---|---|---|---|
+| `nkabom-icon.svg` | Browser tab favicon | SVG | Programme mark — navy/gold linked circles |
+| `nkabom-logo.svg` | Dashboard sidebar (via white variant), login, form header | SVG | Full Nkabom wordmark, light backgrounds |
+| `nkabom-logo-white.svg` | Dashboard sidebar (dark background) | SVG | Reverse wordmark |
 | `mcgill.svg` | Form header, login page (light backgrounds) | SVG | McGill primary mark, dark version |
 | `mcgill-white.svg` | Dashboard sidebar (dark background) | SVG | McGill mark, white/reverse for dark navy |
 | `mastercard-foundation.svg` | Form header, login page | SVG | Mastercard Foundation mark, dark version |
