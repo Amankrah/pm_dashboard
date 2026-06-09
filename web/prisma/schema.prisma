@@ -280,3 +280,47 @@ model OutcomeIndicatorEntry {
   @@unique([pillar, indicator, programYear, quarter])
   @@index([programYear, quarter])
 }
+
+// Phase 9: Program Adjustments per Section 3 of the docx. Three pieces:
+//   WorkplanAdjustment   - per-row changes to the initial workplan
+//                          (Initial Plan / Change / Reason / Implications)
+//   Risk                 - per-row risks emerging from those changes
+//                          (Description / Response approach)
+//   AdjustmentsNarrative - singleton per (programYear, quarter) for
+//                          free-text that doesn't fit rows (upcoming
+//                          activities, dates, events for next period).
+model WorkplanAdjustment {
+  id           String   @id @default(cuid())
+  programYear  Int
+  quarter      Int
+  initialPlan  String
+  change       String
+  reason       String?
+  implications String?
+  orderIndex   Int      @default(0)
+  updatedAt    DateTime @updatedAt
+
+  @@index([programYear, quarter])
+}
+
+model Risk {
+  id          String   @id @default(cuid())
+  programYear Int
+  quarter     Int
+  description String
+  response    String?
+  orderIndex  Int      @default(0)
+  updatedAt   DateTime @updatedAt
+
+  @@index([programYear, quarter])
+}
+
+model AdjustmentsNarrative {
+  id                 String   @id @default(cuid())
+  programYear        Int
+  quarter            Int
+  upcomingActivities String?
+  updatedAt          DateTime @updatedAt
+
+  @@unique([programYear, quarter])
+}
