@@ -72,9 +72,31 @@ model Submission {
   period                     ReportingPeriod @relation(fields: [periodId], references: [id], onDelete: Cascade)
   invite                     FormInvite?     @relation(fields: [inviteId], references: [id])
   activities                 Activity[]
+  challenges                 Challenge[]
 
   @@index([periodId])
   @@index([email])
+}
+
+// Phase 2: structured challenges per the Partner Narrative Report template's
+// "Programme Challenges and Barriers for Success" section. The report wants
+// per-pillar tables of {Challenge, Contributing Factor, Response Approach};
+// we model each row as a Challenge tied to its parent Submission and tagged
+// with the relevant pillar (Education / Access / Entrepreneurship /
+// Networking / Other). pillar uses the same string vocabulary as
+// ActivityTheme.theme.
+model Challenge {
+  id                  String     @id @default(cuid())
+  submissionId        String
+  pillar              String
+  challenge           String
+  contributingFactor  String?
+  responseApproach    String?
+  orderIndex          Int        @default(0)
+  submission          Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@index([submissionId])
+  @@index([pillar])
 }
 
 model Activity {

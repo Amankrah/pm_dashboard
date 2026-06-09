@@ -13,6 +13,13 @@ export type Pillar = (typeof PILLARS)[number];
 export const OTHER_TAG = "Other" as const;
 export type ActivityTag = Pillar | typeof OTHER_TAG;
 
+// Pillar vocabulary used when tagging structured Challenges (Phase 2).
+// Mirrors the Partner Narrative Report's per-pillar challenge tables; the
+// docx groups any non-pillar challenges under an "Other" header, so we keep
+// Other here as a valid choice.
+export const CHALLENGE_PILLARS = [...PILLARS, OTHER_TAG] as const;
+export type ChallengePillar = (typeof CHALLENGE_PILLARS)[number];
+
 export const PILLAR_META: Record<
   Pillar,
   {

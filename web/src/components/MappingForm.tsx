@@ -4,6 +4,7 @@ import { Children, cloneElement, isValidElement, useMemo, useState } from "react
 import {
   ACTIVITY_STATUSES,
   ACTIVITY_TYPES,
+  CHALLENGE_PILLARS,
   FACULTIES,
   LOCALE_TYPES,
   OTHER_TAG,
@@ -11,8 +12,29 @@ import {
   PARTNER_INSTITUTIONS,
   PILLARS,
   PILLAR_META,
+  type ChallengePillar,
   type ParticipantFieldKey,
 } from "@/lib/constants";
+
+// Phase 2: structured Challenges. One row per challenge; faculty add as
+// many as they need. id is local-only (form bookkeeping) and not persisted.
+type ChallengeRow = {
+  id: string;
+  pillar: ChallengePillar;
+  challenge: string;
+  contributing_factor: string;
+  response_approach: string;
+};
+
+function blankChallenge(): ChallengeRow {
+  return {
+    id: crypto.randomUUID(),
+    pillar: "Education",
+    challenge: "",
+    contributing_factor: "",
+    response_approach: "",
+  };
+}
 
 type Prefill = {
   email?: string | null;
@@ -91,7 +113,10 @@ export function MappingForm({
   ]);
   const [resources, setResources] = useState("");
   const [collaborations, setCollaborations] = useState("");
-  const [challenges, setChallenges] = useState("");
+  // Phase 2: structured Challenges. Each row maps to one Challenge model
+  // instance on the server. challengeRows starts empty; faculty add rows as
+  // needed, leave the whole section empty if N/A for this period.
+  const [challengeRows, setChallengeRows] = useState<ChallengeRow[]>([]);
   const [lessons, setLessons] = useState("");
   const [outcomes, setOutcomes] = useState("");
   const [otherInfo, setOtherInfo] = useState("");
@@ -177,10 +202,17 @@ export function MappingForm({
           outputs: a.outputs || undefined,
         };
       }),
+      challenges: challengeRows
+        .filter((r) => r.challenge.trim().length > 0)
+        .map((r) => ({
+          pillar: r.pillar,
+          challenge: r.challenge.trim(),
+          contributing_factor: r.contributing_factor.trim() || undefined,
+          response_approach: r.response_approach.trim() || undefined,
+        })),
       additional: {
         resources_needed: resources || undefined,
         collaboration_opportunities: collaborations || undefined,
-        challenges_barriers: challenges || undefined,
         lessons_learned: lessons || undefined,
         outcomes_achievements: outcomes || undefined,
         other_information: otherInfo || undefined,
@@ -764,18 +796,179 @@ export function MappingForm({
               className="input"
             />
           </Question>
-          <Question
-            fieldId="additional-challenges"
-            question="What challenges or barriers have you encountered (or anticipate)?"
-          >
-            <textarea
-              value={challenges}
-              onChange={(e) => setChallenges(e.target.value)}
-              rows={2}
-              aria-label="What challenges or barriers have you encountered (or anticipate)?"
-              className="input"
-            />
-          </Question>
+          <div>
+            <p className="text-[15px] font-semibold leading-snug text-[#1e293b]">
+              What challenges or barriers have you encountered, and how did you
+              respond?
+            </p>
+            <p className="mt-1 text-[13px] leading-relaxed text-slate-500">
+              Add one row per challenge, tagged with the relevant pillar. Leave
+              this section empty if not applicable for this period. Feeds the
+              Partner Narrative Report&apos;s Programme Challenges and Barriers
+              for Success table.
+            </p>
+            {challengeRows.length === 0 ? (
+              <p className="mt-3 rounded-lg border border-dashed border-slate-300 bg-[#fafcff] px-4 py-3 text-[13px] italic text-slate-500">
+                No challenges added. This will be marked N/A in the report.
+              </p>
+            ) : (
+              <ul className="mt-3 space-y-3">
+                {challengeRows.map((row, idx) => (
+                  <li
+                    key={row.id}
+                    className="rounded-lg border border-slate-200 bg-[#fafcff] p-4"
+                  >
+                    <div className="mb-3 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2">
+                        <span className="flex h-6 min-w-[1.5rem] items-center justify-center rounded-md bg-[#1e3a5f] px-1.5 text-[11px] font-bold text-white">
+                          {idx + 1}
+                        </span>
+                        <label
+                          htmlFor={`challenge-pillar-${row.id}`}
+                          className="text-[11px] font-bold uppercase tracking-wider text-slate-500"
+                        >
+                          Pillar
+                        </label>
+                        <select
+                          id={`challenge-pillar-${row.id}`}
+                          value={row.pillar}
+                          onChange={(e) =>
+                            setChallengeRows((rows) =>
+                              rows.map((r) =>
+                                r.id === row.id
+                                  ? {
+                                      ...r,
+                                      pillar: e.target.value as ChallengePillar,
+                                    }
+                                  : r,
+                              ),
+                            )
+                          }
+                          aria-label="Which pillar does this challenge relate to?"
+                          className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-semibold text-[#1e3a5f]"
+                        >
+                          {CHALLENGE_PILLARS.map((p) => (
+                            <option key={p} value={p}>
+                              {p}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setChallengeRows((rows) =>
+                            rows.filter((r) => r.id !== row.id),
+                          )
+                        }
+                        className="rounded-md px-2 py-1 text-xs font-semibold text-red-600 hover:bg-red-50"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                    <div className="space-y-3">
+                      <div>
+                        <label
+                          htmlFor={`challenge-text-${row.id}`}
+                          className="mb-1 block text-[13px] font-semibold text-[#1e293b]"
+                        >
+                          Challenge
+                          <span aria-hidden="true" className="ml-0.5 text-red-600">
+                            *
+                          </span>
+                        </label>
+                        <textarea
+                          id={`challenge-text-${row.id}`}
+                          value={row.challenge}
+                          onChange={(e) =>
+                            setChallengeRows((rows) =>
+                              rows.map((r) =>
+                                r.id === row.id
+                                  ? { ...r, challenge: e.target.value }
+                                  : r,
+                              ),
+                            )
+                          }
+                          required
+                          rows={2}
+                          placeholder="What went wrong, what was difficult, what blocked progress…"
+                          className="input"
+                        />
+                      </div>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <div>
+                          <label
+                            htmlFor={`challenge-factor-${row.id}`}
+                            className="mb-1 block text-[13px] font-semibold text-[#1e293b]"
+                          >
+                            Contributing factor
+                          </label>
+                          <textarea
+                            id={`challenge-factor-${row.id}`}
+                            value={row.contributing_factor}
+                            onChange={(e) =>
+                              setChallengeRows((rows) =>
+                                rows.map((r) =>
+                                  r.id === row.id
+                                    ? {
+                                        ...r,
+                                        contributing_factor: e.target.value,
+                                      }
+                                    : r,
+                                ),
+                              )
+                            }
+                            rows={2}
+                            placeholder="Underlying cause or context…"
+                            className="input"
+                          />
+                        </div>
+                        <div>
+                          <label
+                            htmlFor={`challenge-response-${row.id}`}
+                            className="mb-1 block text-[13px] font-semibold text-[#1e293b]"
+                          >
+                            Response approach
+                          </label>
+                          <textarea
+                            id={`challenge-response-${row.id}`}
+                            value={row.response_approach}
+                            onChange={(e) =>
+                              setChallengeRows((rows) =>
+                                rows.map((r) =>
+                                  r.id === row.id
+                                    ? {
+                                        ...r,
+                                        response_approach: e.target.value,
+                                      }
+                                    : r,
+                                ),
+                              )
+                            }
+                            rows={2}
+                            placeholder="What you did or plan to do to address it…"
+                            className="input"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <button
+              type="button"
+              onClick={() =>
+                setChallengeRows((rows) => [...rows, blankChallenge()])
+              }
+              className="mt-3 inline-flex items-center gap-2 rounded-lg border-2 border-dashed border-[#2563a8] bg-white px-4 py-2 text-[13px] font-bold text-[#2563a8] transition-colors hover:bg-[#eef3fa]"
+            >
+              <span aria-hidden="true" className="text-lg leading-none">
+                +
+              </span>
+              Add a challenge
+            </button>
+          </div>
           <Question
             fieldId="additional-lessons-learned"
             question="What lessons have you learned during implementation this period?"

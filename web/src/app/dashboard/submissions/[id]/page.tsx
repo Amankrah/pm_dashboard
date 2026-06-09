@@ -4,7 +4,7 @@ import { PrintButton } from "@/components/dashboard/PrintButton";
 import { StatusDot, ThemeTag } from "@/components/dashboard/ThemeTag";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { PARTICIPANT_FIELDS } from "@/lib/constants";
+import { CHALLENGE_PILLARS, PARTICIPANT_FIELDS } from "@/lib/constants";
 
 export default async function SubmissionDetailPage({
   params,
@@ -23,6 +23,7 @@ export default async function SubmissionDetailPage({
         include: { themes: true },
         orderBy: { id: "asc" },
       },
+      challenges: { orderBy: { orderIndex: "asc" } },
       period: {
         select: {
           label: true,
@@ -47,7 +48,7 @@ export default async function SubmissionDetailPage({
     });
   if (submission.challengesBarriers)
     additional.push({
-      label: "Challenges and barriers",
+      label: "Challenges and barriers (legacy free text)",
       value: submission.challengesBarriers,
     });
   if (submission.lessonsLearned)
@@ -279,6 +280,74 @@ export default async function SubmissionDetailPage({
           </ol>
         )}
       </section>
+
+      {submission.challenges.length > 0 && (
+        <section className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
+          <div className="border-b border-slate-200 px-6 py-4">
+            <h2 className="text-base font-bold text-[#1e3a5f]">
+              Challenges and barriers ({submission.challenges.length})
+            </h2>
+            <p className="mt-0.5 text-xs text-slate-500">
+              Grouped by pillar, in the shape of the Partner Narrative
+              Report&apos;s Programme Challenges and Barriers for Success table.
+            </p>
+          </div>
+          <div className="divide-y divide-slate-100">
+            {CHALLENGE_PILLARS.map((pillar) => {
+              const rows = submission.challenges.filter(
+                (c) => c.pillar === pillar,
+              );
+              if (rows.length === 0) return null;
+              return (
+                <div key={pillar} className="px-6 py-5">
+                  <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-[#1e3a5f]">
+                    {pillar}
+                  </h3>
+                  <ol className="space-y-3">
+                    {rows.map((row, idx) => (
+                      <li
+                        key={row.id}
+                        className="rounded-lg border border-slate-200 bg-[#fafcff] p-4"
+                      >
+                        <div className="mb-2 flex items-center gap-2">
+                          <span className="flex h-6 min-w-[1.5rem] items-center justify-center rounded-md bg-[#1e3a5f] px-1.5 text-[11px] font-bold text-white">
+                            {idx + 1}
+                          </span>
+                          <p className="whitespace-pre-line text-sm font-semibold text-[#1e293b]">
+                            {row.challenge}
+                          </p>
+                        </div>
+                        <div className="grid gap-3 pl-9 sm:grid-cols-2">
+                          {row.contributingFactor && (
+                            <div>
+                              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                                Contributing factor
+                              </p>
+                              <p className="mt-1 whitespace-pre-line text-sm leading-relaxed text-slate-700">
+                                {row.contributingFactor}
+                              </p>
+                            </div>
+                          )}
+                          {row.responseApproach && (
+                            <div>
+                              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                                Response approach
+                              </p>
+                              <p className="mt-1 whitespace-pre-line text-sm leading-relaxed text-slate-700">
+                                {row.responseApproach}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {additional.length > 0 && (
         <section className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-200">

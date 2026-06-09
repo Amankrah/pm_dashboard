@@ -28,6 +28,23 @@ const activityTypeEnum = z.enum([
 
 const localeTypeEnum = z.enum(["Rural", "Urban", "Peri-Urban", "Mixed"]);
 
+// Phase 2: structured Challenges per the Partner Narrative Report. Tagged
+// with the same pillar vocabulary used by activity themes (plus Other).
+const challengePillarEnum = z.enum([
+  "Education",
+  "Access",
+  "Entrepreneurship",
+  "Networking",
+  "Other",
+]);
+
+export const challengeSchema = z.object({
+  pillar: challengePillarEnum,
+  challenge: z.string().min(1),
+  contributing_factor: z.string().optional(),
+  response_approach: z.string().optional(),
+});
+
 // Phase 1d: participant counts. Each is a non-negative integer or absent.
 // "absent" maps to NULL in the DB ("not reported"); 0 is preserved as 0
 // ("explicitly zero").
@@ -80,6 +97,9 @@ export const submissionPayloadSchema = z.object({
     submission_date: z.string().min(1),
   }),
   activities: z.array(activitySchema).min(1),
+  // Phase 2: structured Challenges. Optional; faculty with nothing to
+  // report leave it empty.
+  challenges: z.array(challengeSchema).optional(),
   additional: z
     .object({
       resources_needed: z.string().optional(),

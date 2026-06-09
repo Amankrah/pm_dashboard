@@ -6,7 +6,7 @@ export async function createSubmissionFromPayload(
   inviteId: string | null,
   payload: SubmissionPayload,
 ) {
-  const { respondent, activities, additional } = payload;
+  const { respondent, activities, challenges, additional } = payload;
 
   return prisma.$transaction(async (tx) => {
     const submission = await tx.submission.create({
@@ -62,9 +62,21 @@ export async function createSubmissionFromPayload(
             },
           })),
         },
+        challenges: {
+          create: (challenges ?? [])
+            .filter((c) => c.challenge.trim().length > 0)
+            .map((c, idx) => ({
+              pillar: c.pillar,
+              challenge: c.challenge,
+              contributingFactor: c.contributing_factor?.trim() || null,
+              responseApproach: c.response_approach?.trim() || null,
+              orderIndex: idx,
+            })),
+        },
       },
       include: {
         activities: { include: { themes: true, collaborators: true } },
+        challenges: true,
       },
     });
 
