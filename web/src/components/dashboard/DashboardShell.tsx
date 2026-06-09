@@ -28,6 +28,7 @@ const NAV = [
     items: [
       { href: "/dashboard/targets", label: "Targets" },
       { href: "/dashboard/output-indicators", label: "Output Indicators" },
+      { href: "/dashboard/outcome-indicators", label: "Outcome Indicators" },
       { href: "/dashboard/compare", label: "Compare Periods" },
       { href: "/dashboard/quarterly", label: "Quarterly Rollup" },
       { href: "/dashboard/reports", label: "Reports" },

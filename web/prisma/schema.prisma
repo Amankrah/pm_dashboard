@@ -246,3 +246,37 @@ model OutputIndicatorEntry {
   @@unique([pillar, indicator, programYear, quarter])
   @@index([programYear, quarter])
 }
+
+// Phase 8: Outcome Level Progress per Section 4 of the docx. Same shape
+// as the Output indicator tables but a separate namespace because the
+// indicator vocabularies and targets are distinct (outcomes are about
+// programme effects: YiW, enterprise revenue change, dignified jobs %).
+//
+// Values include percentages — stored as integers 0..100 in the value
+// column with the unit metadata living in lib/analytics/outcome-indicators
+// (the constants file). Currency outcomes are not part of this section.
+model OutcomeIndicatorTarget {
+  id          String   @id @default(cuid())
+  pillar      String
+  indicator   String
+  programYear Int
+  target      Int      @default(0)
+  updatedAt   DateTime @updatedAt
+
+  @@unique([pillar, indicator, programYear])
+  @@index([programYear])
+}
+
+model OutcomeIndicatorEntry {
+  id          String   @id @default(cuid())
+  pillar      String
+  indicator   String
+  programYear Int
+  quarter     Int
+  value       Int      @default(0)
+  comments    String?
+  updatedAt   DateTime @updatedAt
+
+  @@unique([pillar, indicator, programYear, quarter])
+  @@index([programYear, quarter])
+}
