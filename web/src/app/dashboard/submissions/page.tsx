@@ -9,7 +9,7 @@ export default async function SubmissionsPage() {
     orderBy: { submittedAt: "desc" },
     include: {
       activities: { include: { themes: true } },
-      period: { select: { label: true } },
+      period: { select: { label: true, reportKey: true } },
     },
   });
   const campaigns = await prisma.reportingPeriod.findMany({
@@ -26,6 +26,7 @@ export default async function SubmissionsPage() {
       fullName: s.fullName,
       faculty: s.faculty,
       periodLabel: s.period.label,
+      reportKey: s.period.reportKey,
       activityCount: s.activities.length,
       themes: [...themes],
       crossPillar: s.activities.some((a) => a.themes.length > 1),

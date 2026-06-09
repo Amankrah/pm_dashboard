@@ -3,7 +3,11 @@ import { inviteLink } from "@/lib/tokens";
 
 export async function listCampaigns() {
   return prisma.reportingPeriod.findMany({
-    orderBy: { createdAt: "desc" },
+    orderBy: [
+      { programYear: "desc" },
+      { quarter: "desc" },
+      { createdAt: "desc" },
+    ],
     include: {
       _count: { select: { submissions: true, invites: true } },
     },

@@ -22,7 +22,15 @@ export default async function SubmissionDetailPage({
         include: { themes: true },
         orderBy: { id: "asc" },
       },
-      period: { select: { label: true, slug: true } },
+      period: {
+        select: {
+          label: true,
+          slug: true,
+          reportKey: true,
+          programYear: true,
+          quarter: true,
+        },
+      },
     },
   });
 
@@ -86,6 +94,9 @@ export default async function SubmissionDetailPage({
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
               <Chip label={submission.faculty} tone="blue" />
+              {submission.period.reportKey && (
+                <Chip label={submission.period.reportKey} tone="amber" />
+              )}
               <Chip label={submission.period.label} tone="slate" />
               <Chip
                 label={`Submitted ${submittedAt}`}
@@ -268,11 +279,19 @@ function Field({
   );
 }
 
-function Chip({ label, tone }: { label: string; tone: "blue" | "slate" }) {
+function Chip({
+  label,
+  tone,
+}: {
+  label: string;
+  tone: "blue" | "slate" | "amber";
+}) {
   const styles =
     tone === "blue"
       ? "bg-[#eef3fa] text-[#1e3a5f] ring-[#cdddef]"
-      : "bg-slate-100 text-slate-700 ring-slate-200";
+      : tone === "amber"
+        ? "bg-[#fff4dc] text-[#7a4300] ring-[#f5d597] font-mono"
+        : "bg-slate-100 text-slate-700 ring-slate-200";
   return (
     <span
       className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ${styles}`}

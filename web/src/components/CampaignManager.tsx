@@ -53,6 +53,9 @@ type Campaign = {
   label: string;
   slug: string;
   status: string;
+  programYear: number | null;
+  quarter: number | null;
+  reportKey: string | null;
   _count: { submissions: number; invites: number };
 };
 
@@ -93,7 +96,10 @@ export function CampaignManager({
   const [campaigns, setCampaigns] = useState<Campaign[]>(initialCampaigns);
   const [selectedId, setSelectedId] = useState(initialSelectedId);
   const [invites, setInvites] = useState<Invite[]>(initialInvites);
-  const [label, setLabel] = useState("");
+  // New-period form (quarterly cadence: programYear + quarter, optional label override)
+  const [newProgramYear, setNewProgramYear] = useState<string>("2");
+  const [newQuarter, setNewQuarter] = useState<string>("3");
+  const [newLabelOverride, setNewLabelOverride] = useState<string>("");
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteName, setInviteName] = useState("");
   const [inviteFaculty, setInviteFaculty] = useState("");
@@ -193,19 +199,40 @@ export function CampaignManager({
 
   async function createCampaign(e: React.FormEvent) {
     e.preventDefault();
+    const py = Number(newProgramYear);
+    const q = Number(newQuarter);
+    if (!Number.isInteger(py) || py < 1 || py > 20) {
+      pushToast("error", "Program year must be a positive integer.");
+      return;
+    }
+    if (!Number.isInteger(q) || q < 1 || q > 4) {
+      pushToast("error", "Quarter must be 1, 2, 3, or 4.");
+      return;
+    }
     setLoading(true);
     const res = await fetch("/api/campaigns", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ label }),
+      body: JSON.stringify({
+        programYear: py,
+        quarter: q,
+        label: newLabelOverride.trim() || undefined,
+      }),
     });
     setLoading(false);
     if (!res.ok) {
-      pushToast("error", "Could not create campaign. Admin access required.");
+      let detail = "Could not create campaign. Admin access required.";
+      try {
+        const data = (await res.json()) as { error?: string };
+        if (data?.error) detail = data.error;
+      } catch {
+        // ignore parse error
+      }
+      pushToast("error", detail);
       return;
     }
-    setLabel("");
-    pushToast("success", "Reporting period created.");
+    setNewLabelOverride("");
+    pushToast("success", `Reporting period Y${py}Q${q} created.`);
     await refreshCampaigns();
   }
 
@@ -249,6 +276,7 @@ export function CampaignManager({
   function buildMailto(inv: Invite) {
     if (!inv.email) return "";
     const periodLabel = selectedCampaign?.label ?? "the current reporting period";
+    const reportKey = selectedCampaign?.reportKey ?? null;
     const greeting = inv.fullName
       ? `Dear ${inv.fullName.trim()},`
       : "Dear colleague,";
@@ -269,7 +297,9 @@ export function CampaignManager({
       SIGN_OFF_TITLE,
       "McGill University",
     ];
-    const subject = `Nkabom Faculty Activity Mapping: ${periodLabel}`;
+    const subject = reportKey
+      ? `Nkabom Faculty Activity Mapping: ${reportKey} (${periodLabel})`
+      : `Nkabom Faculty Activity Mapping: ${periodLabel}`;
     const body = lines.join("\r\n");
     return (
       "mailto:" +
@@ -315,26 +345,84 @@ export function CampaignManager({
         number={1}
         accent="blue"
         title="New reporting period"
-        subtitle="A reporting period groups all submissions during a window. For example, an academic year or a quarter."
+        subtitle="One reporting period per programme quarter. The report key (Y2Q3) matches the Secretariat's Partner Narrative Report template."
       >
-        <form
-          onSubmit={createCampaign}
-          className="flex flex-col gap-3 sm:flex-row"
-        >
-          <input
-            value={label}
-            onChange={(e) => setLabel(e.target.value)}
-            placeholder="e.g. Academic Year 2025-26"
-            required
-            className="input flex-1"
-          />
-          <button
-            type="submit"
-            disabled={loading || !label.trim()}
-            className="rounded-lg bg-[#1e3a5f] px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            Create period
-          </button>
+        <form onSubmit={createCampaign} className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-[140px_140px_1fr_auto] sm:items-end">
+            <div>
+              <label
+                htmlFor="new-program-year"
+                className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-500"
+              >
+                Program year
+              </label>
+              <input
+                id="new-program-year"
+                type="number"
+                min={1}
+                max={20}
+                step={1}
+                value={newProgramYear}
+                onChange={(e) => setNewProgramYear(e.target.value)}
+                placeholder="2"
+                required
+                className="input"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="new-quarter"
+                className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-500"
+              >
+                Quarter
+              </label>
+              <select
+                id="new-quarter"
+                value={newQuarter}
+                onChange={(e) => setNewQuarter(e.target.value)}
+                required
+                className="input"
+              >
+                <option value="1">Q1</option>
+                <option value="2">Q2</option>
+                <option value="3">Q3</option>
+                <option value="4">Q4</option>
+              </select>
+            </div>
+            <div>
+              <label
+                htmlFor="new-label-override"
+                className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-500"
+              >
+                Custom label (optional)
+              </label>
+              <input
+                id="new-label-override"
+                value={newLabelOverride}
+                onChange={(e) => setNewLabelOverride(e.target.value)}
+                placeholder={`Year ${newProgramYear || "?"} Quarter ${newQuarter || "?"}`}
+                className="input"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={loading || !newProgramYear || !newQuarter}
+              className="rounded-lg bg-[#1e3a5f] px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Create period
+            </button>
+          </div>
+          <p className="text-xs text-slate-500">
+            Report key will be{" "}
+            <code className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[11.5px] font-semibold text-[#1e3a5f]">
+              Y{newProgramYear || "?"}Q{newQuarter || "?"}
+            </code>
+            . If you leave the custom label blank the period will be named{" "}
+            <strong>
+              Year {newProgramYear || "?"} Quarter {newQuarter || "?"}
+            </strong>
+            .
+          </p>
         </form>
       </SectionCard>
 
@@ -364,6 +452,7 @@ export function CampaignManager({
               ) : (
                 campaigns.map((c) => (
                   <option key={c.id} value={c.id}>
+                    {c.reportKey ? `${c.reportKey} · ` : ""}
                     {c.label} ({c._count.submissions} submissions,{" "}
                     {c._count.invites} links)
                   </option>
@@ -533,10 +622,15 @@ export function CampaignManager({
       <section className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
         <div className="flex flex-col gap-3 border-b border-slate-200 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-base font-bold text-[#1e3a5f]">
+            <h2 className="flex flex-wrap items-center gap-2 text-base font-bold text-[#1e3a5f]">
               Invite links
+              {selectedCampaign?.reportKey && (
+                <span className="rounded-md bg-[#1e3a5f] px-2 py-0.5 font-mono text-[11.5px] font-semibold text-white">
+                  {selectedCampaign.reportKey}
+                </span>
+              )}
               {selectedCampaign && (
-                <span className="ml-2 text-xs font-normal text-slate-500">
+                <span className="text-xs font-normal text-slate-500">
                   {selectedCampaign.label}
                 </span>
               )}

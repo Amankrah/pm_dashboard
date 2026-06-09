@@ -18,6 +18,13 @@ model ReportingPeriod {
   id          String       @id @default(cuid())
   label       String
   slug        String       @unique
+  // Quarterly cadence for Partner Narrative Report alignment.
+  // programYear: 1, 2, 3, ... (year of the Nkabom programme, not calendar year)
+  // quarter: 1..4
+  // reportKey: canonical sortable identifier, e.g. "Y2Q3"; unique when set
+  programYear Int?
+  quarter     Int?
+  reportKey   String?      @unique
   startDate   String?
   endDate     String?
   status      String       @default("open")

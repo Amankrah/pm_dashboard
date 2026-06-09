@@ -49,7 +49,10 @@ export default async function PublicFormPage({
 
   return (
     <div className="flex min-h-screen flex-col bg-[#edf1f7]">
-      <FormHeader periodLabel={invite.period.label} />
+      <FormHeader
+        periodLabel={invite.period.label}
+        reportKey={invite.period.reportKey}
+      />
       <PillarDefinitions />
       <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8">
         <MappingForm

@@ -1,7 +1,13 @@
 import { BrandLockup } from "@/components/brand/Brand";
 import { PILLARS, PILLAR_META } from "@/lib/constants";
 
-export function FormHeader({ periodLabel }: { periodLabel: string }) {
+export function FormHeader({
+  periodLabel,
+  reportKey,
+}: {
+  periodLabel: string;
+  reportKey?: string | null;
+}) {
   return (
     <header className="border-b border-slate-200 bg-white">
       <div className="border-b border-slate-200">
@@ -27,6 +33,11 @@ export function FormHeader({ periodLabel }: { periodLabel: string }) {
             <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[13px] text-white/90">
               McGill University · Academic Lead Office
             </span>
+            {reportKey && (
+              <span className="rounded-full border border-white/30 bg-[#e8a020] px-3 py-1 font-mono text-[13px] font-semibold text-[#1e3a5f]">
+                {reportKey}
+              </span>
+            )}
             <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[13px] text-white/90">
               {periodLabel}
             </span>

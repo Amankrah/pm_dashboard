@@ -116,16 +116,28 @@ async function main() {
     });
   }
 
+  // Default seeded period: Y2Q3. The Mastercard Foundation Partner Narrative
+  // Report uses YnQq notation; the dashboard uses the same. The legacy
+  // "ay-2025-26" slug is preserved for backward compatibility with any
+  // pre-existing dev fixtures, but new local dev databases will be created
+  // with the quarterly fields populated.
   const period = await prisma.reportingPeriod.upsert({
-    where: { slug: "ay-2025-26" },
+    where: { slug: "y2q3" },
     create: {
-      label: "Academic Year 2025–26",
-      slug: "ay-2025-26",
-      startDate: "2025-09-01",
-      endDate: "2026-08-31",
+      label: "Year 2 Quarter 3",
+      slug: "y2q3",
+      programYear: 2,
+      quarter: 3,
+      reportKey: "Y2Q3",
+      startDate: "2026-04-01",
+      endDate: "2026-06-30",
       status: "open",
     },
-    update: {},
+    update: {
+      programYear: 2,
+      quarter: 3,
+      reportKey: "Y2Q3",
+    },
   });
 
   // Sample submissions are OPT-IN. They are only useful for dashboard

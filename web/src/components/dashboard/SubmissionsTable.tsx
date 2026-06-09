@@ -9,6 +9,7 @@ type Row = {
   fullName: string;
   faculty: string;
   periodLabel: string;
+  reportKey: string | null;
   activityCount: number;
   themes: string[];
   crossPillar: boolean;
@@ -67,7 +68,16 @@ export function SubmissionsTable({ rows }: { rows: Row[] }) {
                   </Link>
                 </td>
                 <td className="px-4 py-3 text-xs">{s.faculty}</td>
-                <td className="px-4 py-3">{s.periodLabel}</td>
+                <td className="px-4 py-3 whitespace-nowrap">
+                  {s.reportKey && (
+                    <span className="mr-2 inline-block rounded-md bg-[#fff4dc] px-1.5 py-0.5 font-mono text-[11px] font-semibold text-[#7a4300] ring-1 ring-[#f5d597]">
+                      {s.reportKey}
+                    </span>
+                  )}
+                  <span className="text-xs text-slate-600">
+                    {s.periodLabel}
+                  </span>
+                </td>
                 <td className="px-4 py-3">{s.activityCount}</td>
                 <td className="px-4 py-3">
                   <div className="flex flex-wrap gap-1">
