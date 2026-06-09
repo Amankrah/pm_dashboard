@@ -158,6 +158,11 @@ export default async function SubmissionDetailPage({
                         </h3>
                         <div className="mt-1.5 flex flex-wrap items-center gap-2">
                           <StatusDot status={a.status} />
+                          {a.activityType && (
+                            <span className="rounded-full bg-[#eef3fa] px-2 py-0.5 text-[10px] font-semibold text-[#1e3a5f] ring-1 ring-[#cdddef]">
+                              {a.activityType}
+                            </span>
+                          )}
                           {themes.map((t) => (
                             <ThemeTag key={t} theme={t} />
                           ))}
@@ -203,6 +208,12 @@ export default async function SubmissionDetailPage({
                           </>
                         }
                       />
+                    )}
+                    {a.location && (
+                      <Field label="Location" value={a.location} />
+                    )}
+                    {a.localeType && (
+                      <Field label="Setting" value={a.localeType} />
                     )}
                   </div>
 

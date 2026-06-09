@@ -29,6 +29,9 @@ export async function createSubmissionFromPayload(
           create: activities.map((act) => ({
             title: act.title,
             status: act.status,
+            activityType: act.activity_type ?? null,
+            location: act.location ?? null,
+            localeType: act.locale_type ?? null,
             description: act.description ?? null,
             startDate: act.start_date ?? null,
             endDate: act.end_date ?? null,

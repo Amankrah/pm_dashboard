@@ -12,6 +12,22 @@ const themeTagEnum = z.enum([
 
 const statusEnum = z.enum(["Completed", "Ongoing", "Planned"]);
 
+// Phase 1c report-aligned activity descriptors. Optional in the schema for
+// backward compatibility, but enforced in the form for new submissions.
+const activityTypeEnum = z.enum([
+  "Training",
+  "Workshop",
+  "Meeting",
+  "Event",
+  "Course",
+  "Mentorship",
+  "Outreach",
+  "Research",
+  "Other",
+]);
+
+const localeTypeEnum = z.enum(["Rural", "Urban", "Peri-Urban", "Mixed"]);
+
 export const collaboratorSchema = z.object({
   name: z.string().min(1),
   faculty: z.string().optional(),
@@ -22,6 +38,9 @@ export const activitySchema = z.object({
   title: z.string().min(1),
   themes: z.array(themeTagEnum).min(1),
   status: statusEnum,
+  activity_type: activityTypeEnum.optional(),
+  location: z.string().optional(),
+  locale_type: localeTypeEnum.optional(),
   description: z.string().optional(),
   start_date: z.string().optional(),
   end_date: z.string().optional(),

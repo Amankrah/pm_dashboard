@@ -78,6 +78,13 @@ model Activity {
   submissionId       String
   title              String
   status             String
+  // Phase 1c: report-aligned descriptors.
+  // activityType: Training / Workshop / Meeting / Event / Course / Mentorship / Outreach / Research / Other
+  // location:    free text, e.g. "Kumasi" or "Accra, Tamale, Kumasi"
+  // localeType:  Rural / Urban / Peri-Urban / Mixed
+  activityType       String?
+  location           String?
+  localeType         String?
   description        String?
   startDate          String?
   endDate            String?

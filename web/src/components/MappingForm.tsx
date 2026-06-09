@@ -3,7 +3,9 @@
 import { Children, cloneElement, isValidElement, useMemo, useState } from "react";
 import {
   ACTIVITY_STATUSES,
+  ACTIVITY_TYPES,
   FACULTIES,
+  LOCALE_TYPES,
   OTHER_TAG,
   PARTNER_INSTITUTIONS,
   PILLARS,
@@ -21,6 +23,9 @@ type ActivityDraft = {
   title: string;
   themes: string[];
   status: string;
+  activity_type: string;
+  location: string;
+  locale_type: string;
   description: string;
   start_date: string;
   end_date: string;
@@ -37,6 +42,9 @@ function blankActivity(id: string): ActivityDraft {
     title: "",
     themes: [],
     status: "",
+    activity_type: "",
+    location: "",
+    locale_type: "",
     description: "",
     start_date: "",
     end_date: "",
@@ -121,6 +129,9 @@ export function MappingForm({
         title: a.title,
         themes: a.themes,
         status: a.status,
+        activity_type: a.activity_type || undefined,
+        location: a.location || undefined,
+        locale_type: a.locale_type || undefined,
         description: a.description || undefined,
         start_date: a.start_date || undefined,
         end_date: a.end_date || undefined,
@@ -438,6 +449,29 @@ export function MappingForm({
                   </select>
                 </Question>
                 <Question
+                  fieldId={`activity-type-${act.id}`}
+                  required
+                  question="What type of activity is this?"
+                  hint="Used for the Partner Narrative Report's Description of activities section."
+                >
+                  <select
+                    aria-label="What type of activity is this?"
+                    required
+                    value={act.activity_type}
+                    onChange={(e) =>
+                      updateActivity(act.id, { activity_type: e.target.value })
+                    }
+                    className="input"
+                  >
+                    <option value="">Select type…</option>
+                    {ACTIVITY_TYPES.map((t) => (
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
+                    ))}
+                  </select>
+                </Question>
+                <Question
                   fieldId={`activity-description-${act.id}`}
                   question="How would you describe this activity and its purpose?"
                   className="sm:col-span-2"
@@ -479,6 +513,41 @@ export function MappingForm({
                     }
                     className="input"
                   />
+                </Question>
+                <Question
+                  fieldId={`activity-location-${act.id}`}
+                  question="Where did this activity take place?"
+                  hint="Free text. List one or more place names, e.g. Kumasi or Accra, Tamale."
+                >
+                  <input
+                    value={act.location}
+                    onChange={(e) =>
+                      updateActivity(act.id, { location: e.target.value })
+                    }
+                    placeholder="e.g. Kumasi"
+                    className="input"
+                  />
+                </Question>
+                <Question
+                  fieldId={`activity-locale-${act.id}`}
+                  question="Which setting describes the location best?"
+                  hint="Rural, Urban, Peri-Urban. Pick Mixed if the activity spanned more than one."
+                >
+                  <select
+                    aria-label="Which setting describes the location best?"
+                    value={act.locale_type}
+                    onChange={(e) =>
+                      updateActivity(act.id, { locale_type: e.target.value })
+                    }
+                    className="input"
+                  >
+                    <option value="">Select setting…</option>
+                    {LOCALE_TYPES.map((l) => (
+                      <option key={l} value={l}>
+                        {l}
+                      </option>
+                    ))}
+                  </select>
                 </Question>
                 <Question
                   fieldId={`activity-outputs-${act.id}`}

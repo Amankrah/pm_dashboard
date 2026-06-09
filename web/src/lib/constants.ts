@@ -111,6 +111,31 @@ export const PARTNER_INSTITUTIONS = [
 
 export const ACTIVITY_STATUSES = ["Completed", "Ongoing", "Planned"] as const;
 
+// Activity type taxonomy from the Partner Narrative Report template's
+// "Description of activities" instructions. Used in MappingForm Section 2
+// and surfaced on the submission detail page. "Other" is a tolerated value
+// for activities that don't fit any of the canonical types.
+export const ACTIVITY_TYPES = [
+  "Training",
+  "Workshop",
+  "Meeting",
+  "Event",
+  "Course",
+  "Mentorship",
+  "Outreach",
+  "Research",
+  "Other",
+] as const;
+
+export type ActivityType = (typeof ACTIVITY_TYPES)[number];
+
+// Where the activity took place. Maps directly to the Outreach
+// disaggregation rows in the Overall Indicator Performance table
+// (Rural / Urban / Peri-Urban).
+export const LOCALE_TYPES = ["Rural", "Urban", "Peri-Urban", "Mixed"] as const;
+
+export type LocaleType = (typeof LOCALE_TYPES)[number];
+
 export function themeClass(t: string) {
   if (t === "Education") return "edu";
   if (t === "Access") return "acc";
