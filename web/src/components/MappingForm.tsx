@@ -9,11 +9,14 @@ import {
   LOCALE_TYPES,
   OTHER_TAG,
   PARTICIPANT_FIELDS,
-  PARTNER_INSTITUTIONS,
+  PARTNER_INSTITUTIONS_BY_TYPE,
+  PARTNER_OTHER_SENTINEL,
+  PARTNER_TYPES,
   PILLARS,
   PILLAR_META,
   type ChallengePillar,
   type ParticipantFieldKey,
+  type PartnerType,
 } from "@/lib/constants";
 
 // Phase 2: structured Challenges. One row per challenge; faculty add as
@@ -56,6 +59,7 @@ type ActivityDraft = {
   description: string;
   start_date: string;
   end_date: string;
+  partner_type: PartnerType | "";
   partner_institution: string;
   partner_other: string;
   contact_name: string;
@@ -82,6 +86,7 @@ function blankActivity(id: string): ActivityDraft {
     description: "",
     start_date: "",
     end_date: "",
+    partner_type: "",
     partner_institution: "",
     partner_other: "",
     contact_name: "",
@@ -193,8 +198,9 @@ export function MappingForm({
           description: a.description || undefined,
           start_date: a.start_date || undefined,
           end_date: a.end_date || undefined,
+          partner_type: a.partner_type || undefined,
           partner_institution:
-            a.partner_institution === "Other"
+            a.partner_institution === PARTNER_OTHER_SENTINEL
               ? a.partner_other
               : a.partner_institution,
           contact_name: a.contact_name,
@@ -639,39 +645,77 @@ export function MappingForm({
               >
                 <div className="grid gap-5 sm:grid-cols-2">
                   <Question
-                    fieldId={`activity-partner-${act.id}`}
+                    fieldId={`activity-partner-type-${act.id}`}
                     required
-                    question="Which Ghanaian partner institution is involved?"
-                    className={
-                      act.partner_institution === "Other"
-                        ? "sm:col-span-2"
-                        : "sm:col-span-2"
-                    }
+                    question="What type of partner are you working with?"
+                    hint="Classifies the partnership for the Partner Narrative Report's Collaboration Update section."
+                    className="sm:col-span-2"
                   >
                     <select
-                      aria-label="Which Ghanaian partner institution is involved?"
+                      aria-label="What type of partner are you working with?"
                       required
-                      value={act.partner_institution}
-                      onChange={(e) =>
+                      value={act.partner_type}
+                      onChange={(e) => {
+                        const next = e.target.value as PartnerType | "";
                         updateActivity(act.id, {
-                          partner_institution: e.target.value,
-                        })
-                      }
+                          partner_type: next,
+                          // Reset institution when type changes, so the user
+                          // picks from the new filtered list.
+                          partner_institution: "",
+                          partner_other: "",
+                        });
+                      }}
                       className="input"
                     >
-                      <option value="">Select partner…</option>
-                      {PARTNER_INSTITUTIONS.map((p) => (
-                        <option key={p} value={p}>
-                          {p}
+                      <option value="">Select partner type…</option>
+                      {PARTNER_TYPES.map((t) => (
+                        <option key={t} value={t}>
+                          {t}
                         </option>
                       ))}
                     </select>
                   </Question>
-                  {act.partner_institution === "Other" && (
+                  {act.partner_type && (
+                    <Question
+                      fieldId={`activity-partner-${act.id}`}
+                      required
+                      question="Which partner institution is involved?"
+                      className="sm:col-span-2"
+                    >
+                      <select
+                        aria-label="Which partner institution is involved?"
+                        required
+                        value={act.partner_institution}
+                        onChange={(e) =>
+                          updateActivity(act.id, {
+                            partner_institution: e.target.value,
+                            partner_other:
+                              e.target.value === PARTNER_OTHER_SENTINEL
+                                ? act.partner_other
+                                : "",
+                          })
+                        }
+                        className="input"
+                      >
+                        <option value="">Select partner…</option>
+                        {PARTNER_INSTITUTIONS_BY_TYPE[
+                          act.partner_type as PartnerType
+                        ].map((p) => (
+                          <option key={p} value={p}>
+                            {p}
+                          </option>
+                        ))}
+                        <option value={PARTNER_OTHER_SENTINEL}>
+                          {PARTNER_OTHER_SENTINEL}
+                        </option>
+                      </select>
+                    </Question>
+                  )}
+                  {act.partner_institution === PARTNER_OTHER_SENTINEL && (
                     <Question
                       fieldId={`activity-partner-other-${act.id}`}
                       required
-                      question="Please name the other partner institution:"
+                      question="Please name the partner institution:"
                       className="sm:col-span-2"
                     >
                       <input

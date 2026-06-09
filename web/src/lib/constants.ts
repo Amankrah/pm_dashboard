@@ -105,16 +105,51 @@ export const FAC_FULL_NAMES: Record<string, string> = {
   SGI: "Sustainability Growth Initiative",
 };
 
-export const PARTNER_INSTITUTIONS = [
-  "Association of Ghana Industries",
-  "Ashesi University",
-  "Koforidua Technical University",
-  "Kwame Nkrumah University of Science and Technology (KNUST)",
-  "University of Environment and Sustainable Development",
-  "University of Ghana",
-  "University of Health and Allied Sciences (UHAS)",
+// Phase 3: partner type expansion. The Partner Narrative Report's
+// Collaboration Update section asks about engagement with government,
+// industry, community organisations, and academic institutions; the form
+// now classifies each partner with a type and offers a curated list of
+// known institutions per type.
+export const PARTNER_TYPES = [
+  "Academic",
+  "Industry",
+  "Community Organization",
+  "Government",
   "Other",
 ] as const;
+
+export type PartnerType = (typeof PARTNER_TYPES)[number];
+
+// Known Ghanaian partner institutions grouped by type. Empty groups are
+// legal: faculty can always pick "Other (specify)" and type a free-text
+// institution name. Add new institutions here as the network grows.
+export const PARTNER_INSTITUTIONS_BY_TYPE: Record<
+  PartnerType,
+  readonly string[]
+> = {
+  Academic: [
+    "Ashesi University",
+    "Koforidua Technical University",
+    "Kwame Nkrumah University of Science and Technology (KNUST)",
+    "University of Environment and Sustainable Development",
+    "University of Ghana",
+    "University of Health and Allied Sciences (UHAS)",
+  ],
+  Industry: ["Association of Ghana Industries"],
+  "Community Organization": [],
+  Government: [],
+  Other: [],
+};
+
+// Flat union for places that need every known institution at once
+// (filters, import paths). Excludes the "Other (specify)" sentinel.
+export const PARTNER_INSTITUTIONS = [
+  ...new Set(Object.values(PARTNER_INSTITUTIONS_BY_TYPE).flat()),
+] as const;
+
+// Sentinel used in the form to mean "the institution is not in the list;
+// faculty types a free-text name in a separate input".
+export const PARTNER_OTHER_SENTINEL = "Other (specify)" as const;
 
 export const ACTIVITY_STATUSES = ["Completed", "Ongoing", "Planned"] as const;
 

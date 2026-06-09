@@ -28,6 +28,15 @@ const activityTypeEnum = z.enum([
 
 const localeTypeEnum = z.enum(["Rural", "Urban", "Peri-Urban", "Mixed"]);
 
+// Phase 3: partner type classifier.
+const partnerTypeEnum = z.enum([
+  "Academic",
+  "Industry",
+  "Community Organization",
+  "Government",
+  "Other",
+]);
+
 // Phase 2: structured Challenges per the Partner Narrative Report. Tagged
 // with the same pillar vocabulary used by activity themes (plus Other).
 const challengePillarEnum = z.enum([
@@ -80,6 +89,7 @@ export const activitySchema = z.object({
   description: z.string().optional(),
   start_date: z.string().optional(),
   end_date: z.string().optional(),
+  partner_type: partnerTypeEnum.optional(),
   partner_institution: z.string().min(1),
   contact_name: z.string().min(1),
   contact_email: z.string().email(),

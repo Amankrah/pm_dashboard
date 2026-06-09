@@ -126,6 +126,10 @@ model Activity {
   description        String?
   startDate          String?
   endDate            String?
+  // Phase 3: partner type classifier feeding the Collaboration Update
+  // section. Values: Academic / Industry / Community Organization /
+  // Government / Other.
+  partnerType        String?
   partnerInstitution String?
   contactName        String?
   contactEmail       String?

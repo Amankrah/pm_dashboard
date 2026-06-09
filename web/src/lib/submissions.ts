@@ -44,6 +44,7 @@ export async function createSubmissionFromPayload(
             description: act.description ?? null,
             startDate: act.start_date ?? null,
             endDate: act.end_date ?? null,
+            partnerType: act.partner_type ?? null,
             partnerInstitution: act.partner_institution,
             contactName: act.contact_name,
             contactEmail: act.contact_email,

@@ -192,7 +192,16 @@ export default async function SubmissionDetailPage({
                     {a.partnerInstitution && (
                       <Field
                         label="Partner institution"
-                        value={a.partnerInstitution}
+                        value={
+                          <>
+                            {a.partnerType && (
+                              <span className="mr-2 inline-block rounded-full bg-[#eef3fa] px-2 py-0.5 text-[10px] font-semibold text-[#1e3a5f] ring-1 ring-[#cdddef]">
+                                {a.partnerType}
+                              </span>
+                            )}
+                            {a.partnerInstitution}
+                          </>
+                        }
                       />
                     )}
                     {a.contactName && (
