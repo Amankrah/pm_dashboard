@@ -210,3 +210,39 @@ model IndicatorTarget {
   @@unique([indicator, programYear])
   @@index([programYear])
 }
+
+// Phase 7: Output Level Progress per Section 4 of the docx. Two models:
+//   OutputIndicatorTarget  - one annual target per (pillar, indicator,
+//                            programYear). indicator uses the
+//                            OUTPUT_INDICATORS vocabulary in
+//                            lib/analytics/output-indicators.ts.
+//   OutputIndicatorEntry   - per-quarter achieved value + comments.
+//
+// Annual targets are admin-entered once per programme year. Quarterly
+// entries are admin-entered each quarter. Cumulative YTD is computed by
+// summing all quarter entries for a (pillar, indicator, programYear).
+model OutputIndicatorTarget {
+  id          String   @id @default(cuid())
+  pillar      String
+  indicator   String
+  programYear Int
+  target      Int      @default(0)
+  updatedAt   DateTime @updatedAt
+
+  @@unique([pillar, indicator, programYear])
+  @@index([programYear])
+}
+
+model OutputIndicatorEntry {
+  id          String   @id @default(cuid())
+  pillar      String
+  indicator   String
+  programYear Int
+  quarter     Int
+  value       Int      @default(0)
+  comments    String?
+  updatedAt   DateTime @updatedAt
+
+  @@unique([pillar, indicator, programYear, quarter])
+  @@index([programYear, quarter])
+}
