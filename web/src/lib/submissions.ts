@@ -23,6 +23,7 @@ export async function createSubmissionFromPayload(
         collaborationOpportunities:
           additional?.collaboration_opportunities ?? null,
         challengesBarriers: additional?.challenges_barriers ?? null,
+        lessonsLearned: additional?.lessons_learned ?? null,
         outcomesAchievements: additional?.outcomes_achievements ?? null,
         otherInformation: additional?.other_information ?? null,
         activities: {
@@ -32,6 +33,14 @@ export async function createSubmissionFromPayload(
             activityType: act.activity_type ?? null,
             location: act.location ?? null,
             localeType: act.locale_type ?? null,
+            outreachCount: act.outreach_count ?? null,
+            participantsTotal: act.participants_total ?? null,
+            participantsYouth: act.participants_youth ?? null,
+            participantsWomen: act.participants_women ?? null,
+            participantsYiW: act.participants_yiw ?? null,
+            participantsYiWWomen: act.participants_yiw_women ?? null,
+            participantsDisability: act.participants_disability ?? null,
+            participantsRefugeeIdp: act.participants_refugee_idp ?? null,
             description: act.description ?? null,
             startDate: act.start_date ?? null,
             endDate: act.end_date ?? null,

@@ -28,6 +28,16 @@ const activityTypeEnum = z.enum([
 
 const localeTypeEnum = z.enum(["Rural", "Urban", "Peri-Urban", "Mixed"]);
 
+// Phase 1d: participant counts. Each is a non-negative integer or absent.
+// "absent" maps to NULL in the DB ("not reported"); 0 is preserved as 0
+// ("explicitly zero").
+const countField = z.coerce
+  .number()
+  .int()
+  .min(0)
+  .max(10_000_000)
+  .optional();
+
 export const collaboratorSchema = z.object({
   name: z.string().min(1),
   faculty: z.string().optional(),
@@ -41,6 +51,15 @@ export const activitySchema = z.object({
   activity_type: activityTypeEnum.optional(),
   location: z.string().optional(),
   locale_type: localeTypeEnum.optional(),
+  // Participant disaggregation. All optional.
+  outreach_count: countField,
+  participants_total: countField,
+  participants_youth: countField,
+  participants_women: countField,
+  participants_yiw: countField,
+  participants_yiw_women: countField,
+  participants_disability: countField,
+  participants_refugee_idp: countField,
   description: z.string().optional(),
   start_date: z.string().optional(),
   end_date: z.string().optional(),
@@ -66,6 +85,7 @@ export const submissionPayloadSchema = z.object({
       resources_needed: z.string().optional(),
       collaboration_opportunities: z.string().optional(),
       challenges_barriers: z.string().optional(),
+      lessons_learned: z.string().optional(),
       outcomes_achievements: z.string().optional(),
       other_information: z.string().optional(),
     })

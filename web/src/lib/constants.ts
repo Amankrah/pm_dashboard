@@ -136,6 +136,69 @@ export const LOCALE_TYPES = ["Rural", "Urban", "Peri-Urban", "Mixed"] as const;
 
 export type LocaleType = (typeof LOCALE_TYPES)[number];
 
+// Per-activity participant counts feeding the Partner Narrative Report's
+// Overall Indicator Performance table. The keys match the JSON payload
+// field names that go from the form to the API; the corresponding Prisma
+// column names are the camelCased equivalents handled in submissions.ts.
+//
+// All counts are optional. NULL ("not reported") and 0 ("explicitly zero")
+// are stored distinctly so we can flag activities the respondent simply
+// skipped.
+export const PARTICIPANT_FIELDS = [
+  {
+    key: "outreach_count",
+    column: "outreachCount",
+    label: "Outreach",
+    hint: "People reached or made aware of this activity, including those who did not participate directly.",
+  },
+  {
+    key: "participants_total",
+    column: "participantsTotal",
+    label: "Total participants",
+    hint: "People who actually engaged with or attended this activity.",
+  },
+  {
+    key: "participants_youth",
+    column: "participantsYouth",
+    label: "Youth (15 to 35)",
+    hint: "Subset of total participants in the 15 to 35 age range.",
+  },
+  {
+    key: "participants_women",
+    column: "participantsWomen",
+    label: "Women",
+    hint: "Subset of total participants who are women.",
+  },
+  {
+    key: "participants_yiw",
+    column: "participantsYiW",
+    label: "Youth in Work",
+    hint: "Youth participants who moved into actual employment or income-generating opportunities, per the Mastercard Foundation Shared Measures definition.",
+  },
+  {
+    key: "participants_yiw_women",
+    column: "participantsYiWWomen",
+    label: "Youth in Work (women)",
+    hint: "Subset of Youth in Work who are women.",
+  },
+  {
+    key: "participants_disability",
+    column: "participantsDisability",
+    label: "With disabilities",
+    hint: "Subset of total participants who are persons with disabilities.",
+  },
+  {
+    key: "participants_refugee_idp",
+    column: "participantsRefugeeIdp",
+    label: "Refugees or IDPs",
+    hint: "Subset of total participants who are refugees or internally displaced persons.",
+  },
+] as const;
+
+export type ParticipantFieldKey = (typeof PARTICIPANT_FIELDS)[number]["key"];
+export type ParticipantFieldColumn =
+  (typeof PARTICIPANT_FIELDS)[number]["column"];
+
 export function themeClass(t: string) {
   if (t === "Education") return "edu";
   if (t === "Access") return "acc";

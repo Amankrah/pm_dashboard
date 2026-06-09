@@ -4,6 +4,7 @@ import { PrintButton } from "@/components/dashboard/PrintButton";
 import { StatusDot, ThemeTag } from "@/components/dashboard/ThemeTag";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { PARTICIPANT_FIELDS } from "@/lib/constants";
 
 export default async function SubmissionDetailPage({
   params,
@@ -48,6 +49,11 @@ export default async function SubmissionDetailPage({
     additional.push({
       label: "Challenges and barriers",
       value: submission.challengesBarriers,
+    });
+  if (submission.lessonsLearned)
+    additional.push({
+      label: "Lessons learned",
+      value: submission.lessonsLearned,
     });
   if (submission.outcomesAchievements)
     additional.push({
@@ -216,6 +222,35 @@ export default async function SubmissionDetailPage({
                       <Field label="Setting" value={a.localeType} />
                     )}
                   </div>
+
+                  {(() => {
+                    const reported = PARTICIPANT_FIELDS.filter(
+                      (f) => a[f.column] !== null && a[f.column] !== undefined,
+                    );
+                    if (reported.length === 0) return null;
+                    return (
+                      <div className="mt-5">
+                        <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                          Participants
+                        </p>
+                        <div className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+                          {reported.map((f) => (
+                            <div
+                              key={f.key}
+                              className="rounded-md bg-slate-50 px-3 py-2 ring-1 ring-slate-200"
+                            >
+                              <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                                {f.label}
+                              </p>
+                              <p className="mt-0.5 text-lg font-bold text-[#1e3a5f]">
+                                {(a[f.column] as number).toLocaleString()}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })()}
 
                   {a.description && (
                     <div className="mt-4">

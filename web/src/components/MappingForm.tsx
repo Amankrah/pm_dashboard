@@ -7,9 +7,11 @@ import {
   FACULTIES,
   LOCALE_TYPES,
   OTHER_TAG,
+  PARTICIPANT_FIELDS,
   PARTNER_INSTITUTIONS,
   PILLARS,
   PILLAR_META,
+  type ParticipantFieldKey,
 } from "@/lib/constants";
 
 type Prefill = {
@@ -26,6 +28,9 @@ type ActivityDraft = {
   activity_type: string;
   location: string;
   locale_type: string;
+  // Participant counts stored as strings to keep the inputs controlled and
+  // distinguish blank ("not reported") from "0" ("explicitly zero").
+  counts: Record<ParticipantFieldKey, string>;
   description: string;
   start_date: string;
   end_date: string;
@@ -36,6 +41,12 @@ type ActivityDraft = {
   outputs: string;
 };
 
+function blankCounts(): Record<ParticipantFieldKey, string> {
+  const out = {} as Record<ParticipantFieldKey, string>;
+  for (const f of PARTICIPANT_FIELDS) out[f.key] = "";
+  return out;
+}
+
 function blankActivity(id: string): ActivityDraft {
   return {
     id,
@@ -45,6 +56,7 @@ function blankActivity(id: string): ActivityDraft {
     activity_type: "",
     location: "",
     locale_type: "",
+    counts: blankCounts(),
     description: "",
     start_date: "",
     end_date: "",
@@ -80,6 +92,7 @@ export function MappingForm({
   const [resources, setResources] = useState("");
   const [collaborations, setCollaborations] = useState("");
   const [challenges, setChallenges] = useState("");
+  const [lessons, setLessons] = useState("");
   const [outcomes, setOutcomes] = useState("");
   const [otherInfo, setOtherInfo] = useState("");
   const [declaration, setDeclaration] = useState(false);
@@ -108,6 +121,14 @@ export function MappingForm({
     );
   }
 
+  function updateCount(id: string, key: ParticipantFieldKey, value: string) {
+    setActivities((list) =>
+      list.map((a) =>
+        a.id === id ? { ...a, counts: { ...a.counts, [key]: value } } : a,
+      ),
+    );
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
@@ -125,28 +146,42 @@ export function MappingForm({
         position,
         submission_date: submissionDate,
       },
-      activities: activities.map((a) => ({
-        title: a.title,
-        themes: a.themes,
-        status: a.status,
-        activity_type: a.activity_type || undefined,
-        location: a.location || undefined,
-        locale_type: a.locale_type || undefined,
-        description: a.description || undefined,
-        start_date: a.start_date || undefined,
-        end_date: a.end_date || undefined,
-        partner_institution:
-          a.partner_institution === "Other"
-            ? a.partner_other
-            : a.partner_institution,
-        contact_name: a.contact_name,
-        contact_email: a.contact_email,
-        outputs: a.outputs || undefined,
-      })),
+      activities: activities.map((a) => {
+        const counts: Record<string, number | undefined> = {};
+        for (const f of PARTICIPANT_FIELDS) {
+          const raw = a.counts[f.key]?.trim();
+          if (raw === undefined || raw === "") {
+            counts[f.key] = undefined;
+          } else {
+            const n = Number(raw);
+            counts[f.key] = Number.isFinite(n) && n >= 0 ? n : undefined;
+          }
+        }
+        return {
+          title: a.title,
+          themes: a.themes,
+          status: a.status,
+          activity_type: a.activity_type || undefined,
+          location: a.location || undefined,
+          locale_type: a.locale_type || undefined,
+          ...counts,
+          description: a.description || undefined,
+          start_date: a.start_date || undefined,
+          end_date: a.end_date || undefined,
+          partner_institution:
+            a.partner_institution === "Other"
+              ? a.partner_other
+              : a.partner_institution,
+          contact_name: a.contact_name,
+          contact_email: a.contact_email,
+          outputs: a.outputs || undefined,
+        };
+      }),
       additional: {
         resources_needed: resources || undefined,
         collaboration_opportunities: collaborations || undefined,
         challenges_barriers: challenges || undefined,
+        lessons_learned: lessons || undefined,
         outcomes_achievements: outcomes || undefined,
         other_information: otherInfo || undefined,
       },
@@ -653,6 +688,33 @@ export function MappingForm({
                   </Question>
                 </div>
               </SubGroup>
+
+              <SubGroup
+                title="Participants"
+                hint="How many people did this activity reach? Leave a field blank if you cannot report it. These numbers roll up into the Partner Narrative Report's Overall Indicator Performance table."
+              >
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  {PARTICIPANT_FIELDS.map((f) => (
+                    <Question
+                      key={f.key}
+                      fieldId={`activity-${f.key}-${act.id}`}
+                      question={f.label}
+                      hint={f.hint}
+                    >
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        min={0}
+                        step={1}
+                        value={act.counts[f.key]}
+                        onChange={(e) => updateCount(act.id, f.key, e.target.value)}
+                        placeholder="0"
+                        className="input"
+                      />
+                    </Question>
+                  ))}
+                </div>
+              </SubGroup>
             </div>
           </div>
         ))}
@@ -711,6 +773,20 @@ export function MappingForm({
               onChange={(e) => setChallenges(e.target.value)}
               rows={2}
               aria-label="What challenges or barriers have you encountered (or anticipate)?"
+              className="input"
+            />
+          </Question>
+          <Question
+            fieldId="additional-lessons-learned"
+            question="What lessons have you learned during implementation this period?"
+            hint="Feeds the Partner Narrative Report's Implementation Learning section. What worked, what didn't, and how it might inform future programming or adjustments."
+          >
+            <textarea
+              value={lessons}
+              onChange={(e) => setLessons(e.target.value)}
+              rows={3}
+              placeholder="Lessons learned and how they may inform future programming…"
+              aria-label="What lessons have you learned during implementation this period?"
               className="input"
             />
           </Question>

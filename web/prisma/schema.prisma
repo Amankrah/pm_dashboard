@@ -62,6 +62,10 @@ model Submission {
   resourcesNeeded            String?
   collaborationOpportunities String?
   challengesBarriers         String?
+  // Phase 1e: maps to the Partner Narrative Report's "Implementation
+  // Learning" section. Free-text lessons learned during the reporting
+  // period.
+  lessonsLearned             String?
   outcomesAchievements       String?
   otherInformation           String?
   submittedAt                DateTime        @default(now())
@@ -85,6 +89,18 @@ model Activity {
   activityType       String?
   location           String?
   localeType         String?
+  // Phase 1d: participant disaggregation feeding the Overall Indicator
+  // Performance table. All counts are nullable: NULL means "not reported",
+  // 0 means "explicitly zero". Locale split (Rural/Urban/Peri-Urban) is
+  // derived from Activity.localeType rather than duplicated as counts.
+  outreachCount             Int?
+  participantsTotal         Int?
+  participantsYouth         Int?
+  participantsWomen         Int?
+  participantsDisability    Int?
+  participantsRefugeeIdp    Int?
+  participantsYiW           Int?
+  participantsYiWWomen      Int?
   description        String?
   startDate          String?
   endDate            String?
