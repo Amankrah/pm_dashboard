@@ -261,6 +261,46 @@ export function CampaignManager({
     await refreshInvites(selectedId);
   }
 
+  // Phase 10: quarterly rollover. Flip the selected period's status
+  // between open and closed. Closed periods reject new public submissions
+  // and we also disable the "Generate shareable link" button on the
+  // client.
+  async function togglePeriodStatus() {
+    if (!selectedCampaign) return;
+    const nextStatus =
+      selectedCampaign.status === "closed" ? "open" : "closed";
+    const verb = nextStatus === "closed" ? "Close" : "Reopen";
+    const label =
+      selectedCampaign.reportKey ?? selectedCampaign.label;
+    if (
+      !window.confirm(
+        nextStatus === "closed"
+          ? `${verb} ${label}? Faculty will no longer be able to submit through invite links for this period.`
+          : `${verb} ${label}? Faculty will be able to submit again.`,
+      )
+    ) {
+      return;
+    }
+    setLoading(true);
+    const res = await fetch(`/api/campaigns/${selectedCampaign.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: nextStatus }),
+    });
+    setLoading(false);
+    if (!res.ok) {
+      pushToast("error", "Could not update status. Admin access required.");
+      return;
+    }
+    pushToast(
+      "success",
+      nextStatus === "closed"
+        ? `${label} closed. New submissions blocked.`
+        : `${label} reopened. Faculty can submit again.`,
+    );
+    await refreshCampaigns();
+  }
+
   async function copyLink(inv: Invite) {
     try {
       await navigator.clipboard.writeText(inv.link);
@@ -453,8 +493,10 @@ export function CampaignManager({
                 campaigns.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.reportKey ? `${c.reportKey} · ` : ""}
-                    {c.label} ({c._count.submissions} submissions,{" "}
-                    {c._count.invites} links)
+                    {c.label}
+                    {c.status === "closed" ? " [closed]" : ""} (
+                    {c._count.submissions} submissions, {c._count.invites}{" "}
+                    links)
                   </option>
                 ))
               )}
@@ -528,11 +570,22 @@ export function CampaignManager({
             </div>
             <button
               type="submit"
-              disabled={loading || !selectedId}
+              disabled={
+                loading ||
+                !selectedId ||
+                selectedCampaign?.status === "closed"
+              }
+              title={
+                selectedCampaign?.status === "closed"
+                  ? "Reopen this period to generate new invite links."
+                  : undefined
+              }
               className="sm:col-span-2 lg:col-span-3 inline-flex items-center justify-center gap-2 rounded-lg bg-[#1a6b44] px-5 py-3 text-sm font-bold text-white shadow-sm transition-opacity hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <PlusIcon />
-              Generate shareable link
+              {selectedCampaign?.status === "closed"
+                ? "Period closed — reopen to generate"
+                : "Generate shareable link"}
             </button>
           </form>
         </div>
@@ -634,6 +687,18 @@ export function CampaignManager({
                   {selectedCampaign.label}
                 </span>
               )}
+              {selectedCampaign?.status === "closed" && (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-200 px-2.5 py-0.5 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-300">
+                  <span className="h-1.5 w-1.5 rounded-full bg-slate-500" />
+                  Closed
+                </span>
+              )}
+              {selectedCampaign?.status === "open" && (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 ring-1 ring-emerald-200">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  Open
+                </span>
+              )}
             </h2>
             <p className="mt-0.5 text-xs text-slate-500">
               {filteredInvites.length} of {invites.length}{" "}
@@ -641,6 +706,27 @@ export function CampaignManager({
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            {selectedCampaign && (
+              <button
+                type="button"
+                onClick={togglePeriodStatus}
+                disabled={loading}
+                className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+                  selectedCampaign.status === "closed"
+                    ? "border-emerald-300 bg-white text-emerald-700 hover:bg-emerald-50"
+                    : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                }`}
+                title={
+                  selectedCampaign.status === "closed"
+                    ? "Reopen this period so faculty can submit again"
+                    : "Close this period — blocks new faculty submissions"
+                }
+              >
+                {selectedCampaign.status === "closed"
+                  ? "Reopen period"
+                  : "Close period"}
+              </button>
+            )}
             <div className="relative">
               <input
                 value={query}
