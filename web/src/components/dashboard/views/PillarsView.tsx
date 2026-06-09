@@ -29,7 +29,9 @@ export function PillarsView() {
             ? "from-[#1a4a8a] to-[#1e5fa8]"
             : m.cls === "acc"
               ? "from-[#0f4a2c] to-[#1a6b44]"
-              : "from-[#7a4300] to-[#a05c00]";
+              : m.cls === "ent"
+                ? "from-[#7a4300] to-[#a05c00]"
+                : "from-[#3f157f] to-[#5b21b6]";
 
         return (
           <div key={key} className="overflow-hidden rounded-[10px] bg-white shadow-sm">

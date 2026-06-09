@@ -10,7 +10,7 @@ import {
   Tooltip,
 } from "chart.js";
 import { Bar, Doughnut } from "react-chartjs-2";
-import { PILLARS } from "@/lib/constants";
+import { PILLARS, PILLAR_META } from "@/lib/constants";
 import type { FlatActivity } from "@/lib/analytics/types";
 
 ChartJS.register(
@@ -23,16 +23,19 @@ ChartJS.register(
 );
 
 export function OverviewCharts({ acts }: { acts: FlatActivity[] }) {
-  const edu = acts.filter((a) => a.themes.includes("Education")).length;
-  const acc = acts.filter((a) => a.themes.includes("Access and Success")).length;
-  const ent = acts.filter((a) => a.themes.includes("Entrepreneurship")).length;
+  const labels = [...PILLARS];
+  const colors = PILLARS.map((p) => PILLAR_META[p].color);
+
+  const totalsByPillar = PILLARS.map(
+    (p) => acts.filter((a) => a.themes.includes(p)).length,
+  );
 
   const pillarData = {
-    labels: ["Education", "Access & Success", "Entrepreneurship"],
+    labels,
     datasets: [
       {
-        data: [edu, acc, ent],
-        backgroundColor: ["#1e5fa8", "#1a6b44", "#a05c00"],
+        data: totalsByPillar,
+        backgroundColor: colors,
         borderWidth: 2,
         borderColor: "#fff",
       },
@@ -50,7 +53,7 @@ export function OverviewCharts({ acts }: { acts: FlatActivity[] }) {
   );
 
   const statusData = {
-    labels: ["Education", "Access & Success", "Entrepreneurship"],
+    labels,
     datasets: [
       { label: "Completed", data: compByP, backgroundColor: "#15803d" },
       { label: "Ongoing", data: goByP, backgroundColor: "#a05c00" },

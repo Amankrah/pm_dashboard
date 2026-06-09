@@ -60,7 +60,7 @@ export function OverviewView() {
         <p className="text-[11px] text-slate-500">Activities mapped to each pillar</p>
       </div>
 
-      <div className="grid gap-3.5 lg:grid-cols-3">
+      <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
         {PILLARS.map((key) => {
           const m = PILLAR_META[key];
           const { done, going, plan, tot, pct } = pillarStats(acts, key);

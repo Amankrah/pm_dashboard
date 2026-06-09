@@ -75,7 +75,7 @@ const SAMPLE_SUBMISSIONS = [
     activities: [
       {
         title: "Nutrition-Sensitive Food Systems Research",
-        themes: ["Education", "Access and Success"],
+        themes: ["Education", "Access"],
         status: "Ongoing",
         description:
           "Joint research on improving nutritional outcomes in rural Ghana.",
@@ -128,11 +128,17 @@ async function main() {
     update: {},
   });
 
+  // Sample submissions are OPT-IN. They are only useful for dashboard
+  // walkthroughs and local UI development; production deployments must
+  // start with a clean database. To load them in dev, run:
+  //   SEED_SAMPLES=true npm run db:seed
+  const loadSamples = process.env.SEED_SAMPLES === "true";
+
   const existingCount = await prisma.submission.count({
     where: { periodId: period.id },
   });
 
-  if (existingCount === 0) {
+  if (loadSamples && existingCount === 0) {
     for (const sample of SAMPLE_SUBMISSIONS) {
       const sub = await prisma.submission.create({
         data: {
@@ -171,6 +177,11 @@ async function main() {
   }
 
   console.log("Seed complete. Allowed users:", [...emails].join(", "));
+  if (!loadSamples) {
+    console.log(
+      "Sample submissions skipped (SEED_SAMPLES not set to 'true'). Production starts empty.",
+    );
+  }
 }
 
 main()

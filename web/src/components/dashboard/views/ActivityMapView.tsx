@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { useAnalytics } from "@/components/dashboard/AnalyticsProvider";
 import { StatusDot, ThemeTag } from "@/components/dashboard/ThemeTag";
-import { FAC_SHORT } from "@/lib/constants";
+import { FAC_SHORT, PILLARS } from "@/lib/constants";
 
 export function ActivityMapView() {
   const { filteredActivities } = useAnalytics();
@@ -90,9 +90,12 @@ export function ActivityMapView() {
             className="block rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"
           >
             <option value="">All Pillars</option>
-            <option value="Education">Education</option>
-            <option value="Access and Success">Access & Success</option>
-            <option value="Entrepreneurship">Entrepreneurship</option>
+            {PILLARS.map((p) => (
+              <option key={p} value={p}>
+                {p}
+              </option>
+            ))}
+            <option value="Other">Other</option>
           </select>
         </label>
         <label className="text-xs font-semibold text-slate-600">

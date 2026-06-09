@@ -1,26 +1,5 @@
 import { PILLAR_META, PILLARS } from "@/lib/constants";
 
-const PILLAR_CLASS: Record<string, string> = {
-  Education: "border-t-[#1e5fa8]",
-  "Access and Success": "border-t-[#1a6b44]",
-  Entrepreneurship: "border-t-[#a05c00]",
-};
-
-const PILLAR_TITLE_COLOR: Record<string, string> = {
-  Education: "text-[#1e5fa8]",
-  "Access and Success": "text-[#1a6b44]",
-  Entrepreneurship: "text-[#a05c00]",
-};
-
-const PILLAR_DESC: Record<string, string> = {
-  Education:
-    "We develop the next generation of agri-food leaders through hands-on, experiential learning in climate-smart agriculture, nutrition-sensitive practices, and community-based research. Curriculum is co-created with industry, community, and institutional partners to ensure training is practical and responsive to Ghana's evolving needs.",
-  "Access and Success":
-    "We create inclusive, flexible pathways for young people, especially women, refugees, and persons with disabilities, to thrive in the agri-food and nutrition sectors through scholarships, mentorship, and targeted support that remove barriers to participation and enable transition into meaningful employment.",
-  Entrepreneurship:
-    "We foster an enabling environment for youth-led innovation through business incubation, mentorship, policy engagement, and access to networks and markets, helping young people transform ideas into impactful ventures that create jobs, improve livelihoods, and drive sustainable economic growth in communities across Ghana.",
-};
-
 export function PillarDefinitions() {
   return (
     <section className="border-t-[3px] border-[#1e3a5f] bg-[#f4f7fb] py-7">
@@ -31,15 +10,16 @@ export function PillarDefinitions() {
         <p className="mb-5 text-[15px] text-slate-600">
           When you describe each activity below, select the pillar or pillars that
           best describe how the work contributes to the collaborative. You may
-          select more than one.
+          select more than one. If an activity does not fit any of the four
+          pillars, tag it as Other on the activity itself.
         </p>
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {PILLARS.map((key) => {
             const m = PILLAR_META[key];
             return (
               <div
                 key={key}
-                className={`rounded-[10px] border-t-4 bg-white p-5 shadow-sm ${PILLAR_CLASS[key]}`}
+                className={`rounded-[10px] border-t-4 bg-white p-5 shadow-sm ${m.borderTopClass}`}
               >
                 <span
                   className={`inline-flex h-7 w-7 items-center justify-center rounded-md text-xs font-bold text-white ${m.bgClass}`}
@@ -48,7 +28,7 @@ export function PillarDefinitions() {
                   {m.abbr}
                 </span>
                 <h3
-                  className={`mt-2 text-sm font-extrabold ${PILLAR_TITLE_COLOR[key]}`}
+                  className={`mt-2 text-sm font-extrabold ${m.textClass}`}
                 >
                   {key}
                 </h3>
@@ -56,7 +36,7 @@ export function PillarDefinitions() {
                   {m.short}
                 </p>
                 <p className="mt-2 text-[13px] leading-relaxed text-slate-700">
-                  {PILLAR_DESC[key]}
+                  {m.desc}
                 </p>
               </div>
             );

@@ -1,10 +1,17 @@
 export const PILLARS = [
   "Education",
-  "Access and Success",
+  "Access",
   "Entrepreneurship",
+  "Networking",
 ] as const;
 
 export type Pillar = (typeof PILLARS)[number];
+
+// "Other" is a legal tag value on an activity but is NOT a pillar. It never
+// appears in pillar rollups, targets, or charts. The form exposes it as a
+// separate checkbox alongside the four pillars.
+export const OTHER_TAG = "Other" as const;
+export type ActivityTag = Pillar | typeof OTHER_TAG;
 
 export const PILLAR_META: Record<
   Pillar,
@@ -13,6 +20,8 @@ export const PILLAR_META: Record<
     abbr: string;
     color: string;
     bgClass: string;
+    borderTopClass: string;
+    textClass: string;
     short: string;
     desc: string;
   }
@@ -22,14 +31,18 @@ export const PILLAR_META: Record<
     abbr: "Ed",
     color: "#1e5fa8",
     bgClass: "bg-[#1e5fa8]",
+    borderTopClass: "border-t-[#1e5fa8]",
+    textClass: "text-[#1e5fa8]",
     short: "Building Skills and Knowledge",
     desc: "Building agricultural skills and academic knowledge to strengthen capacity across Ghana and Canada.",
   },
-  "Access and Success": {
+  Access: {
     cls: "acc",
     abbr: "Ac",
     color: "#1a6b44",
     bgClass: "bg-[#1a6b44]",
+    borderTopClass: "border-t-[#1a6b44]",
+    textClass: "text-[#1a6b44]",
     short: "Expanding Opportunities",
     desc: "Expanding access to higher education and professional opportunities for underserved communities.",
   },
@@ -38,8 +51,20 @@ export const PILLAR_META: Record<
     abbr: "En",
     color: "#a05c00",
     bgClass: "bg-[#a05c00]",
+    borderTopClass: "border-t-[#a05c00]",
+    textClass: "text-[#a05c00]",
     short: "Driving Innovation and Impact",
     desc: "Driving innovation and enterprise development in the agri-food value chain.",
+  },
+  Networking: {
+    cls: "net",
+    abbr: "Nw",
+    color: "#5b21b6",
+    bgClass: "bg-[#5b21b6]",
+    borderTopClass: "border-t-[#5b21b6]",
+    textClass: "text-[#5b21b6]",
+    short: "Sustained Opportunity",
+    desc: "Building enduring connections between students, employers, alumni, and partner institutions across Ghana and Canada to translate education and access into sustained opportunity.",
   },
 };
 
@@ -88,8 +113,9 @@ export const ACTIVITY_STATUSES = ["Completed", "Ongoing", "Planned"] as const;
 
 export function themeClass(t: string) {
   if (t === "Education") return "edu";
-  if (t === "Access and Success") return "acc";
+  if (t === "Access") return "acc";
   if (t === "Entrepreneurship") return "ent";
+  if (t === "Networking") return "net";
   return "";
 }
 

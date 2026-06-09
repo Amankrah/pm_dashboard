@@ -1,9 +1,13 @@
 import { z } from "zod";
 
-const pillarEnum = z.enum([
+// Activity tags: the four pillars plus the "Other" catchall. "Other" is a
+// valid tag but never appears in pillar rollups (see lib/constants.ts).
+const themeTagEnum = z.enum([
   "Education",
-  "Access and Success",
+  "Access",
   "Entrepreneurship",
+  "Networking",
+  "Other",
 ]);
 
 const statusEnum = z.enum(["Completed", "Ongoing", "Planned"]);
@@ -16,7 +20,7 @@ export const collaboratorSchema = z.object({
 
 export const activitySchema = z.object({
   title: z.string().min(1),
-  themes: z.array(pillarEnum).min(1),
+  themes: z.array(themeTagEnum).min(1),
   status: statusEnum,
   description: z.string().optional(),
   start_date: z.string().optional(),

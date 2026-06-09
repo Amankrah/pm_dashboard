@@ -4,9 +4,16 @@ import { useMemo, useState } from "react";
 import { useAnalytics } from "@/components/dashboard/AnalyticsProvider";
 import { filterByPeriod, periodLabel } from "@/lib/analytics/periods";
 import { countByStatus } from "@/lib/analytics/metrics-core";
+import { PILLARS } from "@/lib/constants";
 
 function periodMetrics(acts: ReturnType<typeof filterByPeriod>) {
   const s = countByStatus(acts);
+  const pillarCounts = Object.fromEntries(
+    PILLARS.map((p) => [
+      p,
+      acts.filter((a) => a.themes.includes(p)).length,
+    ]),
+  ) as Record<(typeof PILLARS)[number], number>;
   return {
     total: s.total,
     done: s.completed,
@@ -16,9 +23,7 @@ function periodMetrics(acts: ReturnType<typeof filterByPeriod>) {
     ongoing: s.ongoing,
     planned: s.planned,
     partners: new Set(acts.map((a) => a.partnerInstitution).filter(Boolean)).size,
-    eduN: acts.filter((a) => a.themes.includes("Education")).length,
-    accN: acts.filter((a) => a.themes.includes("Access and Success")).length,
-    entN: acts.filter((a) => a.themes.includes("Entrepreneurship")).length,
+    pillarCounts,
   };
 }
 
@@ -49,16 +54,21 @@ export function CompareView() {
     return { mA, mB, labelA: periodLabel(periodA), labelB: periodLabel(periodB) };
   }, [periodA, periodB, data]);
 
-  const rows = comparison
+  const rows: [string, number, number][] = comparison
     ? [
         ["Total Activities", comparison.mA.total, comparison.mB.total],
         ["Completed", comparison.mA.done, comparison.mB.done],
         ["Ongoing", comparison.mA.go, comparison.mB.go],
         ["Planned", comparison.mA.plan, comparison.mB.plan],
         ["Partners", comparison.mA.partners, comparison.mB.partners],
-        ["Education", comparison.mA.eduN, comparison.mB.eduN],
-        ["Access & Success", comparison.mA.accN, comparison.mB.accN],
-        ["Entrepreneurship", comparison.mA.entN, comparison.mB.entN],
+        ...PILLARS.map(
+          (p) =>
+            [
+              p,
+              comparison.mA.pillarCounts[p],
+              comparison.mB.pillarCounts[p],
+            ] as [string, number, number],
+        ),
       ]
     : [];
 

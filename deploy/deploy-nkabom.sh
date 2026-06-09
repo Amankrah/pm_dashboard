@@ -22,7 +22,7 @@
 # Flags:
 #   --skip-security   Skip Phase 1 (firewall / fail2ban / SSH hardening)
 #   --skip-ssl        Skip Phase 5.2 (certbot)
-#   --skip-seed       Skip Phase 3.6 (Prisma seed of admin row + sample data)
+#   --skip-seed       Skip Phase 3.6 (Prisma seed of admin row + reporting period)
 #
 # Prereqs on the EC2 instance:
 #   - Ubuntu 24.04 LTS, ubuntu user with sudo
@@ -400,8 +400,7 @@ sudo chown -R "$USER:$USER" "$DATA_DIR" "$LOG_DIR" "$BACKUP_DIR"
 print_status "Data: $DATA_DIR  |  Logs: $LOG_DIR  |  Backups: $BACKUP_DIR"
 
 # Track whether this is the first deploy (no DB yet). Used later to decide
-# whether to print the auto-generated password and whether the seed inserts
-# sample submissions (the seed file only seeds samples when the DB is empty).
+# whether to print the auto-generated password.
 FRESH_DB=false
 if [ ! -f "$DB_FILE" ]; then
     FRESH_DB=true
@@ -459,15 +458,12 @@ print_status "Migrations applied to $DB_FILE"
 
 if [[ "$SKIP_SEED" == false ]]; then
     print_step "3.6 Seeding admin row and reporting period"
-    # The seed file is idempotent (upserts the allowlist + reporting period
-    # on every run, only inserts the two sample submissions when the DB is
-    # empty). Safe to call on every deploy.
+    # The seed is idempotent: it upserts the allowlist users and the default
+    # reporting period on every run. Sample submissions are opt-in (gated by
+    # SEED_SAMPLES=true) and we DO NOT set that here, so production starts
+    # with a clean database. Safe to call on every deploy.
     npx prisma db seed
-    if [ "$FRESH_DB" = true ]; then
-        print_warning "Fresh DB - the seed inserted two SAMPLE submissions for visualisation."
-        print_warning "Delete them via /dashboard/submissions when you're ready for real data."
-    fi
-    print_status "Seed complete"
+    print_status "Seed complete (no sample submissions inserted)"
 else
     print_warning "Skipping seed (--skip-seed). Make sure AllowedUser has at least one row."
 fi

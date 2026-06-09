@@ -6,6 +6,7 @@ export function ThemeTag({ theme }: { theme: string }) {
     edu: "bg-[#1e5fa8]",
     acc: "bg-[#1a6b44]",
     ent: "bg-[#a05c00]",
+    net: "bg-[#5b21b6]",
   };
   return (
     <span

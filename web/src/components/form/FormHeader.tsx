@@ -1,5 +1,5 @@
 import { BrandLockup } from "@/components/brand/Brand";
-import { PILLARS } from "@/lib/constants";
+import { PILLARS, PILLAR_META } from "@/lib/constants";
 
 export function FormHeader({ periodLabel }: { periodLabel: string }) {
   return (
@@ -41,15 +41,9 @@ export function FormHeader({ periodLabel }: { periodLabel: string }) {
             {PILLARS.map((p) => (
               <span
                 key={p}
-                className={`rounded-full px-3 py-0.5 text-xs font-semibold text-white ${
-                  p === "Education"
-                    ? "bg-[#1e5fa8]"
-                    : p === "Access and Success"
-                      ? "bg-[#1a6b44]"
-                      : "bg-[#a05c00]"
-                }`}
+                className={`rounded-full px-3 py-0.5 text-xs font-semibold text-white ${PILLAR_META[p].bgClass}`}
               >
-                {p === "Access and Success" ? "Access & Success" : p}
+                {p}
               </span>
             ))}
           </div>

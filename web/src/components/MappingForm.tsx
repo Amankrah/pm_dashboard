@@ -4,6 +4,7 @@ import { Children, cloneElement, isValidElement, useMemo, useState } from "react
 import {
   ACTIVITY_STATUSES,
   FACULTIES,
+  OTHER_TAG,
   PARTNER_INSTITUTIONS,
   PILLARS,
   PILLAR_META,
@@ -352,10 +353,10 @@ export function MappingForm({
                   fieldId={`activity-pillars-${act.id}`}
                   required
                   question="Which strategic pillar(s) does this activity advance?"
-                  hint="Select all that apply. See definitions above."
+                  hint="Select all that apply. See definitions above. Use Other only if the activity does not fit any of the four pillars."
                   className="sm:col-span-2"
                 >
-                  <div className="grid gap-2 sm:grid-cols-3">
+                  <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
                     {PILLARS.map((p) => {
                       const m = PILLAR_META[p];
                       const selected = act.themes.includes(p);
@@ -381,7 +382,7 @@ export function MappingForm({
                             {m.abbr}
                           </span>
                           <span className="mt-2 text-xs font-bold text-[#1e3a5f]">
-                            {p === "Access and Success" ? "Access & Success" : p}
+                            {p}
                           </span>
                           <span className="text-[10px] text-slate-500">
                             {m.short}
@@ -389,6 +390,29 @@ export function MappingForm({
                         </label>
                       );
                     })}
+                    <label
+                      className={`flex cursor-pointer flex-col rounded-lg border-2 p-3 transition-colors ${
+                        act.themes.includes(OTHER_TAG)
+                          ? "border-slate-400 bg-slate-100"
+                          : "border-slate-200 bg-white hover:border-slate-300"
+                      } sm:col-span-2 lg:col-span-4`}
+                    >
+                      <input
+                        type="checkbox"
+                        className="sr-only"
+                        checked={act.themes.includes(OTHER_TAG)}
+                        onChange={() => toggleTheme(act.id, OTHER_TAG)}
+                      />
+                      <span className="flex h-6 w-6 items-center justify-center rounded-md bg-slate-500 text-[10px] font-bold text-white">
+                        Ot
+                      </span>
+                      <span className="mt-2 text-xs font-bold text-[#1e3a5f]">
+                        Other
+                      </span>
+                      <span className="text-[10px] text-slate-500">
+                        Activity does not fit any of the four pillars
+                      </span>
+                    </label>
                   </div>
                 </Question>
                 <Question
