@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAnalytics } from "@/components/dashboard/AnalyticsProvider";
 import { ThemeTag } from "@/components/dashboard/ThemeTag";
 import { PILLARS } from "@/lib/constants";
@@ -11,6 +11,10 @@ import {
   getActDate,
   periodLabel,
 } from "@/lib/analytics/periods";
+import {
+  INDICATOR_ROWS,
+  type IndicatorKey,
+} from "@/lib/analytics/indicator-rollup";
 import type { TargetsMap } from "@/lib/analytics/metrics-core";
 import type { FlatActivity } from "@/lib/analytics/types";
 
@@ -221,6 +225,206 @@ export function TargetsView() {
           Loading targets…
         </p>
       )}
+
+      <IndicatorTargetsEditor />
     </div>
+  );
+}
+
+// Phase 6: per-indicator annual targets feeding the Partner Narrative
+// Report's "Annual Target" column. One column of integer inputs per
+// indicator (14 rows) for the currently selected programme year. Saving
+// posts to /api/indicator-targets and the QuarterlyRollupView picks the
+// new values up on next mount or year-switch (it caches per year).
+const PROGRAM_YEARS = [1, 2, 3, 4, 5] as const;
+
+function IndicatorTargetsEditor() {
+  const [programYear, setProgramYear] = useState<number>(2);
+  const [values, setValues] = useState<Record<IndicatorKey, string>>(
+    () => Object.fromEntries(INDICATOR_ROWS.map((r) => [r.key, ""])) as Record<
+      IndicatorKey,
+      string
+    >,
+  );
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [tone, setTone] = useState<"info" | "success" | "error">("info");
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      setLoading(true);
+      setMessage(null);
+      try {
+        const res = await fetch(
+          `/api/indicator-targets?programYear=${programYear}`,
+        );
+        if (cancelled) return;
+        if (!res.ok) {
+          setMessage("Could not load existing targets.");
+          setTone("error");
+          return;
+        }
+        const data = (await res.json()) as {
+          targets?: Partial<Record<IndicatorKey, number>>;
+        };
+        if (cancelled) return;
+        const next = Object.fromEntries(
+          INDICATOR_ROWS.map((r) => [
+            r.key,
+            data.targets?.[r.key] !== undefined
+              ? String(data.targets?.[r.key])
+              : "",
+          ]),
+        ) as Record<IndicatorKey, string>;
+        setValues(next);
+      } catch {
+        if (!cancelled) {
+          setMessage("Network error loading targets.");
+          setTone("error");
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    void load();
+    return () => {
+      cancelled = true;
+    };
+  }, [programYear]);
+
+  async function save() {
+    setSaving(true);
+    setMessage(null);
+    try {
+      const payload = {
+        programYear,
+        values: Object.fromEntries(
+          INDICATOR_ROWS.map((r) => {
+            const raw = values[r.key]?.trim();
+            const n = raw ? Number(raw) : 0;
+            return [r.key, Number.isFinite(n) && n >= 0 ? n : 0];
+          }),
+        ),
+      };
+      const res = await fetch("/api/indicator-targets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        setMessage("Save failed. Admin access required.");
+        setTone("error");
+        return;
+      }
+      setMessage(`Saved targets for Y${programYear}.`);
+      setTone("success");
+    } catch {
+      setMessage("Network error saving targets.");
+      setTone("error");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const messageStyles =
+    tone === "success"
+      ? "bg-emerald-50 text-emerald-700 ring-emerald-200"
+      : tone === "error"
+        ? "bg-red-50 text-red-700 ring-red-200"
+        : "bg-slate-50 text-slate-700 ring-slate-200";
+
+  return (
+    <section className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
+      <div className="flex flex-col gap-3 border-b border-slate-200 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="text-base font-bold text-[#1e3a5f]">
+            Indicator annual targets
+          </h2>
+          <p className="mt-0.5 text-xs text-slate-500">
+            One integer per row of the Partner Narrative Report&apos;s Overall
+            Indicator Performance table. Feeds the Annual Target column on the
+            Quarterly Rollup page.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <label
+            htmlFor="indicator-targets-year"
+            className="text-[11px] font-bold uppercase tracking-wider text-slate-500"
+          >
+            Program year
+          </label>
+          <select
+            id="indicator-targets-year"
+            value={programYear}
+            onChange={(e) => setProgramYear(Number(e.target.value))}
+            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-semibold text-[#1e3a5f]"
+          >
+            {PROGRAM_YEARS.map((y) => (
+              <option key={y} value={y}>
+                Year {y}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-slate-50 text-[11px] uppercase tracking-wide text-slate-500">
+            <tr>
+              <th className="px-4 py-2.5">Indicator</th>
+              <th className="px-4 py-2.5 text-right">Annual target</th>
+            </tr>
+          </thead>
+          <tbody>
+            {INDICATOR_ROWS.map((row) => (
+              <tr key={row.key} className="border-b border-slate-100 last:border-0">
+                <td
+                  className={`px-4 py-2 ${row.indent ? "pl-10 text-slate-700" : "font-semibold text-[#1e3a5f]"}`}
+                >
+                  <label htmlFor={`target-${row.key}`}>{row.label}</label>
+                </td>
+                <td className="px-4 py-2 text-right">
+                  <input
+                    id={`target-${row.key}`}
+                    type="number"
+                    inputMode="numeric"
+                    min={0}
+                    step={1}
+                    value={values[row.key]}
+                    onChange={(e) =>
+                      setValues((v) => ({ ...v, [row.key]: e.target.value }))
+                    }
+                    placeholder="0"
+                    disabled={loading}
+                    className="w-32 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-right text-sm tabular-nums focus:border-[#2563a8] focus:outline-none focus:ring-2 focus:ring-[#2563a8]/20 disabled:bg-slate-50"
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="flex flex-wrap items-center justify-end gap-3 border-t border-slate-200 px-6 py-3">
+        {message && (
+          <span
+            className={`rounded-md px-3 py-1.5 text-xs font-semibold ring-1 ${messageStyles}`}
+          >
+            {message}
+          </span>
+        )}
+        <button
+          type="button"
+          onClick={save}
+          disabled={loading || saving}
+          className="rounded-lg bg-[#1e3a5f] px-5 py-2 text-sm font-bold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {saving ? "Saving…" : `Save Y${programYear} targets`}
+        </button>
+      </div>
+    </section>
   );
 }

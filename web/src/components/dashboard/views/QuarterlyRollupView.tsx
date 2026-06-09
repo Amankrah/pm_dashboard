@@ -1,13 +1,69 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { PILLAR_META } from "@/lib/constants";
 import {
   buildIndicatorRollup,
   buildPillarActivityRollup,
+  type IndicatorKey,
+  type IndicatorTargetLookup,
   type RollupRow,
 } from "@/lib/analytics/indicator-rollup";
 import type { FlatActivity } from "@/lib/analytics/types";
+
+// Targets keyed by programYear so the same fetch cache survives flipping
+// between quarters within a year. Lives outside React state so the
+// snapshot version (a monotonic counter) plays nicely with
+// useSyncExternalStore: getSnapshot returns the same value between
+// updates, the subscribe callback fires on every change.
+const targetsCache = new Map<number, IndicatorTargetLookup>();
+const inflight = new Set<number>();
+const targetsListeners = new Set<() => void>();
+let targetsVersion = 0;
+
+function notifyTargetsChanged() {
+  targetsVersion += 1;
+  for (const cb of targetsListeners) cb();
+}
+
+function subscribeTargets(callback: () => void) {
+  targetsListeners.add(callback);
+  return () => {
+    targetsListeners.delete(callback);
+  };
+}
+
+function getTargetsVersion(): number {
+  return targetsVersion;
+}
+
+// SSR returns 0; client picks up the same starting value so hydration
+// matches.
+function getServerTargetsVersion(): number {
+  return 0;
+}
+
+async function ensureTargetsLoaded(programYear: number) {
+  if (targetsCache.has(programYear) || inflight.has(programYear)) return;
+  inflight.add(programYear);
+  try {
+    const res = await fetch(
+      `/api/indicator-targets?programYear=${programYear}`,
+    );
+    if (!res.ok) {
+      targetsCache.set(programYear, {});
+    } else {
+      const data = (await res.json()) as { targets?: IndicatorTargetLookup };
+      targetsCache.set(programYear, data.targets ?? {});
+    }
+    notifyTargetsChanged();
+  } catch {
+    targetsCache.set(programYear, {});
+    notifyTargetsChanged();
+  } finally {
+    inflight.delete(programYear);
+  }
+}
 
 type Period = {
   id: string;
@@ -33,14 +89,39 @@ export function QuarterlyRollupView({
     [periods, reportKey],
   );
 
+  // Subscribe to the targets cache. The version bumps whenever a fetch
+  // resolves for any programYear, triggering a re-render so the rollup
+  // picks up the new Annual Target numbers.
+  useSyncExternalStore(
+    subscribeTargets,
+    getTargetsVersion,
+    getServerTargetsVersion,
+  );
+
+  // Kick off the fetch when the selected period's programYear changes.
+  // ensureTargetsLoaded is a no-op for already-cached or in-flight years.
+  useEffect(() => {
+    if (selected) {
+      void ensureTargetsLoaded(selected.programYear);
+    }
+  }, [selected]);
+
+  const targets: IndicatorTargetLookup = selected
+    ? (targetsCache.get(selected.programYear) ?? {})
+    : {};
+
   const rollup = useMemo(() => {
     if (!selected) return null;
-    return buildIndicatorRollup(activities, {
-      reportKey: selected.reportKey,
-      programYear: selected.programYear,
-      quarter: selected.quarter,
-    });
-  }, [activities, selected]);
+    return buildIndicatorRollup(
+      activities,
+      {
+        reportKey: selected.reportKey,
+        programYear: selected.programYear,
+        quarter: selected.quarter,
+      },
+      targets,
+    );
+  }, [activities, selected, targets]);
 
   const pillarRollup = useMemo(() => {
     if (!selected) return null;

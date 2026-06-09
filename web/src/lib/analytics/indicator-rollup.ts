@@ -159,9 +159,14 @@ export type RollupContext = {
   quarter: number;
 };
 
+// Phase 6: optional per-indicator annual targets. Keys missing from the
+// map fall back to null (renders as a dash on the page).
+export type IndicatorTargetLookup = Partial<Record<IndicatorKey, number>>;
+
 export function buildIndicatorRollup(
   allActivities: FlatActivity[],
   ctx: RollupContext,
+  targets: IndicatorTargetLookup = {},
 ): {
   rows: RollupRow[];
   previousKey: string | null;
@@ -181,7 +186,7 @@ export function buildIndicatorRollup(
     key: meta.key,
     label: meta.label,
     indent: meta.indent ?? false,
-    annualTarget: null,
+    annualTarget: targets[meta.key] ?? null,
     previousQtr: prv[meta.key],
     currentQtr: cur[meta.key],
     cumulativeYtd: cum[meta.key],

@@ -194,3 +194,19 @@ model PillarTarget {
 
   @@unique([periodKey, pillar])
 }
+
+// Phase 6: per-indicator annual targets feeding the Partner Narrative
+// Report's "Annual Target" column. Keyed by (indicator, programYear) so
+// each programme year gets its own set of 14 indicator targets. indicator
+// uses the IndicatorKey vocabulary from lib/analytics/indicator-rollup.ts
+// (outreach, participantsTotal, etc.).
+model IndicatorTarget {
+  id          String   @id @default(cuid())
+  indicator   String
+  programYear Int
+  target      Int      @default(0)
+  updatedAt   DateTime @updatedAt
+
+  @@unique([indicator, programYear])
+  @@index([programYear])
+}
