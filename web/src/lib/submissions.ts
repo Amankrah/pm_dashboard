@@ -6,7 +6,13 @@ export async function createSubmissionFromPayload(
   inviteId: string | null,
   payload: SubmissionPayload,
 ) {
-  const { respondent, activities, challenges, additional } = payload;
+  const {
+    respondent,
+    activities,
+    challenges,
+    success_stories: successStories,
+    additional,
+  } = payload;
 
   return prisma.$transaction(async (tx) => {
     const submission = await tx.submission.create({
@@ -74,10 +80,28 @@ export async function createSubmissionFromPayload(
               orderIndex: idx,
             })),
         },
+        successStories: {
+          // Privacy guard: schema already drops the name when consent is
+          // false, but we double-check here as defence in depth — never
+          // persist a participant name without explicit consent.
+          create: (successStories ?? [])
+            .filter((s) => s.story.trim().length > 0)
+            .map((s, idx) => ({
+              participantName: s.consent ? s.participant_name ?? null : null,
+              programActivity: s.program_activity.trim(),
+              location: s.location?.trim() || null,
+              story: s.story.trim(),
+              outcomes: s.outcomes?.trim() || null,
+              photoUrl: s.photo_url ?? null,
+              consent: s.consent,
+              orderIndex: idx,
+            })),
+        },
       },
       include: {
         activities: { include: { themes: true, collaborators: true } },
         challenges: true,
+        successStories: true,
       },
     });
 

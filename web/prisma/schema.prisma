@@ -73,9 +73,34 @@ model Submission {
   invite                     FormInvite?     @relation(fields: [inviteId], references: [id])
   activities                 Activity[]
   challenges                 Challenge[]
+  successStories             SuccessStory[]
 
   @@index([periodId])
   @@index([email])
+}
+
+// Phase 4: participant-centred Success Stories per the Partner Narrative
+// Report's Section 6. The consent flag is the docx's signature checkbox;
+// when false, participantName MUST be NULL (enforced at the application
+// layer in submissions.ts and validation.ts). Without consent the story is
+// still useful internally but is suppressed from any outward-facing
+// communication or report output.
+model SuccessStory {
+  id              String     @id @default(cuid())
+  submissionId    String
+  // Participant name is set only when consent is true; never persist a name
+  // without explicit consent.
+  participantName String?
+  programActivity String
+  location        String?
+  story           String
+  outcomes        String?
+  photoUrl        String?
+  consent         Boolean    @default(false)
+  orderIndex      Int        @default(0)
+  submission      Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@index([submissionId])
 }
 
 // Phase 2: structured challenges per the Partner Narrative Report template's

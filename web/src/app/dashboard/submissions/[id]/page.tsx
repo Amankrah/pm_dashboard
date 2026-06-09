@@ -24,6 +24,7 @@ export default async function SubmissionDetailPage({
         orderBy: { id: "asc" },
       },
       challenges: { orderBy: { orderIndex: "asc" } },
+      successStories: { orderBy: { orderIndex: "asc" } },
       period: {
         select: {
           label: true,
@@ -355,6 +356,98 @@ export default async function SubmissionDetailPage({
               );
             })}
           </div>
+        </section>
+      )}
+
+      {submission.successStories.length > 0 && (
+        <section className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
+          <div className="border-b border-slate-200 px-6 py-4">
+            <h2 className="text-base font-bold text-[#1e3a5f]">
+              Success stories ({submission.successStories.length})
+            </h2>
+            <p className="mt-0.5 text-xs text-slate-500">
+              Participant-centred stories for the Partner Narrative Report&apos;s
+              Section 6. Stories without explicit consent stay internal and
+              must not be exported to outward-facing materials.
+            </p>
+          </div>
+          <ul className="divide-y divide-slate-100">
+            {submission.successStories.map((s, idx) => (
+              <li key={s.id} className="px-6 py-5">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="flex items-start gap-3">
+                    <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[#a05c00] text-xs font-bold text-white">
+                      {idx + 1}
+                    </span>
+                    <div>
+                      <p className="text-base font-bold text-[#1e3a5f]">
+                        {s.programActivity}
+                      </p>
+                      <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                        {s.consent ? (
+                          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 ring-1 ring-emerald-200">
+                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                            Consent given
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200">
+                            <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
+                            Internal only (no consent)
+                          </span>
+                        )}
+                        {s.consent && s.participantName && (
+                          <span className="text-xs font-semibold text-[#1e3a5f]">
+                            {s.participantName}
+                          </span>
+                        )}
+                        {s.location && (
+                          <span className="text-xs text-slate-500">
+                            {s.location}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4">
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                    Story
+                  </p>
+                  <p className="mt-1 whitespace-pre-line text-sm leading-relaxed text-slate-700">
+                    {s.story}
+                  </p>
+                </div>
+
+                {s.outcomes && (
+                  <div className="mt-4">
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                      Notable outcomes
+                    </p>
+                    <p className="mt-1 whitespace-pre-line text-sm leading-relaxed text-slate-700">
+                      {s.outcomes}
+                    </p>
+                  </div>
+                )}
+
+                {s.photoUrl && (
+                  <div className="mt-4">
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                      Photo or media
+                    </p>
+                    <a
+                      href={s.photoUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-1 inline-block break-all text-sm font-medium text-[#2563a8] hover:underline"
+                    >
+                      {s.photoUrl}
+                    </a>
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
         </section>
       )}
 

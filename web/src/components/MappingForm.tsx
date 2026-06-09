@@ -14,6 +14,7 @@ import {
   PARTNER_TYPES,
   PILLARS,
   PILLAR_META,
+  SUCCESS_STORY_CONSENT_TEXT,
   type ChallengePillar,
   type ParticipantFieldKey,
   type PartnerType,
@@ -36,6 +37,32 @@ function blankChallenge(): ChallengeRow {
     challenge: "",
     contributing_factor: "",
     response_approach: "",
+  };
+}
+
+// Phase 4: Success Story row. Participant name is only meaningful when the
+// participant has explicitly consented to being featured.
+type SuccessStoryRow = {
+  id: string;
+  consent: boolean;
+  participant_name: string;
+  program_activity: string;
+  location: string;
+  story: string;
+  outcomes: string;
+  photo_url: string;
+};
+
+function blankStory(): SuccessStoryRow {
+  return {
+    id: crypto.randomUUID(),
+    consent: false,
+    participant_name: "",
+    program_activity: "",
+    location: "",
+    story: "",
+    outcomes: "",
+    photo_url: "",
   };
 }
 
@@ -125,6 +152,9 @@ export function MappingForm({
   const [lessons, setLessons] = useState("");
   const [outcomes, setOutcomes] = useState("");
   const [otherInfo, setOtherInfo] = useState("");
+  // Phase 4: success stories. Starts empty; faculty add rows when they
+  // have a story to share. Each row carries its own consent flag.
+  const [storyRows, setStoryRows] = useState<SuccessStoryRow[]>([]);
   const [declaration, setDeclaration] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -215,6 +245,21 @@ export function MappingForm({
           challenge: r.challenge.trim(),
           contributing_factor: r.contributing_factor.trim() || undefined,
           response_approach: r.response_approach.trim() || undefined,
+        })),
+      success_stories: storyRows
+        .filter((s) => s.story.trim().length > 0)
+        .map((s) => ({
+          consent: s.consent,
+          // Privacy guard: omit the name when consent isn't given. Server
+          // also enforces this in validation + persistence.
+          participant_name: s.consent
+            ? s.participant_name.trim() || undefined
+            : undefined,
+          program_activity: s.program_activity.trim(),
+          location: s.location.trim() || undefined,
+          story: s.story.trim(),
+          outcomes: s.outcomes.trim() || undefined,
+          photo_url: s.photo_url.trim() || undefined,
         })),
       additional: {
         resources_needed: resources || undefined,
@@ -1056,6 +1101,255 @@ export function MappingForm({
 
       <SectionCard
         number={4}
+        accent="amber"
+        title="Success stories"
+        subtitle="Share participant-centred stories of impact. Optional, but powerful for the Partner Narrative Report. Leave empty if you have none to share this period."
+      >
+        {storyRows.length === 0 ? (
+          <p className="rounded-lg border border-dashed border-slate-300 bg-[#fafcff] px-4 py-3 text-[13px] italic text-slate-500">
+            No success stories yet. Add one below if you have a participant
+            story to share for this reporting period.
+          </p>
+        ) : (
+          <ul className="space-y-4">
+            {storyRows.map((row, idx) => (
+              <li
+                key={row.id}
+                className="rounded-lg border border-slate-200 bg-[#fafcff] p-5"
+              >
+                <div className="mb-4 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <span className="flex h-7 min-w-[1.75rem] items-center justify-center rounded-md bg-[#a05c00] px-1.5 text-xs font-bold text-white">
+                      {idx + 1}
+                    </span>
+                    <span className="text-[15px] font-bold text-[#1e3a5f]">
+                      Success story {idx + 1}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setStoryRows((rows) => rows.filter((r) => r.id !== row.id))
+                    }
+                    className="rounded-md px-2 py-1 text-xs font-semibold text-red-600 hover:bg-red-50"
+                  >
+                    Remove
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label
+                      htmlFor={`story-text-${row.id}`}
+                      className="mb-1 block text-[13px] font-semibold text-[#1e293b]"
+                    >
+                      Story
+                      <span aria-hidden="true" className="ml-0.5 text-red-600">
+                        *
+                      </span>
+                    </label>
+                    <p className="mb-2 text-[12px] leading-relaxed text-slate-500">
+                      The participant&apos;s background, the support or
+                      activities they participated in, changes or outcomes they
+                      experienced, and how the programme contributed.
+                    </p>
+                    <textarea
+                      id={`story-text-${row.id}`}
+                      value={row.story}
+                      onChange={(e) =>
+                        setStoryRows((rows) =>
+                          rows.map((r) =>
+                            r.id === row.id ? { ...r, story: e.target.value } : r,
+                          ),
+                        )
+                      }
+                      required
+                      rows={5}
+                      placeholder="Tell the story…"
+                      className="input"
+                    />
+                  </div>
+
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <label
+                        htmlFor={`story-activity-${row.id}`}
+                        className="mb-1 block text-[13px] font-semibold text-[#1e293b]"
+                      >
+                        Programme or activity
+                        <span aria-hidden="true" className="ml-0.5 text-red-600">
+                          *
+                        </span>
+                      </label>
+                      <input
+                        id={`story-activity-${row.id}`}
+                        value={row.program_activity}
+                        onChange={(e) =>
+                          setStoryRows((rows) =>
+                            rows.map((r) =>
+                              r.id === row.id
+                                ? { ...r, program_activity: e.target.value }
+                                : r,
+                            ),
+                          )
+                        }
+                        required
+                        placeholder="Which activity did they participate in?"
+                        className="input"
+                      />
+                    </div>
+                    <div>
+                      <label
+                        htmlFor={`story-location-${row.id}`}
+                        className="mb-1 block text-[13px] font-semibold text-[#1e293b]"
+                      >
+                        Location
+                      </label>
+                      <input
+                        id={`story-location-${row.id}`}
+                        value={row.location}
+                        onChange={(e) =>
+                          setStoryRows((rows) =>
+                            rows.map((r) =>
+                              r.id === row.id
+                                ? { ...r, location: e.target.value }
+                                : r,
+                            ),
+                          )
+                        }
+                        placeholder="e.g. Kumasi"
+                        className="input"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor={`story-outcomes-${row.id}`}
+                      className="mb-1 block text-[13px] font-semibold text-[#1e293b]"
+                    >
+                      Notable outcomes
+                    </label>
+                    <p className="mb-2 text-[12px] leading-relaxed text-slate-500">
+                      Employment, business growth, leadership, or personal
+                      development outcomes. Quotes or testimonials welcome.
+                    </p>
+                    <textarea
+                      id={`story-outcomes-${row.id}`}
+                      value={row.outcomes}
+                      onChange={(e) =>
+                        setStoryRows((rows) =>
+                          rows.map((r) =>
+                            r.id === row.id
+                              ? { ...r, outcomes: e.target.value }
+                              : r,
+                          ),
+                        )
+                      }
+                      rows={2}
+                      placeholder="Measurable impact, achievements, quotes…"
+                      className="input"
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor={`story-photo-${row.id}`}
+                      className="mb-1 block text-[13px] font-semibold text-[#1e293b]"
+                    >
+                      Photo or media URL
+                    </label>
+                    <input
+                      id={`story-photo-${row.id}`}
+                      type="url"
+                      value={row.photo_url}
+                      onChange={(e) =>
+                        setStoryRows((rows) =>
+                          rows.map((r) =>
+                            r.id === row.id
+                              ? { ...r, photo_url: e.target.value }
+                              : r,
+                          ),
+                        )
+                      }
+                      placeholder="https://… (optional)"
+                      className="input"
+                    />
+                  </div>
+
+                  <div className="rounded-lg border-2 border-slate-200 bg-white p-3">
+                    <label className="flex cursor-pointer items-start gap-3">
+                      <input
+                        type="checkbox"
+                        checked={row.consent}
+                        onChange={(e) =>
+                          setStoryRows((rows) =>
+                            rows.map((r) =>
+                              r.id === row.id
+                                ? {
+                                    ...r,
+                                    consent: e.target.checked,
+                                    // Privacy guard: clear name when consent
+                                    // is withdrawn.
+                                    participant_name: e.target.checked
+                                      ? r.participant_name
+                                      : "",
+                                  }
+                                : r,
+                            ),
+                          )
+                        }
+                        className="mt-0.5 h-4 w-4 shrink-0 accent-[#1e3a5f]"
+                      />
+                      <span className="text-[13px] leading-relaxed text-slate-700">
+                        {SUCCESS_STORY_CONSENT_TEXT}
+                      </span>
+                    </label>
+                    {row.consent && (
+                      <div className="mt-3 border-t border-slate-100 pt-3">
+                        <label
+                          htmlFor={`story-name-${row.id}`}
+                          className="mb-1 block text-[13px] font-semibold text-[#1e293b]"
+                        >
+                          Participant name
+                        </label>
+                        <input
+                          id={`story-name-${row.id}`}
+                          value={row.participant_name}
+                          onChange={(e) =>
+                            setStoryRows((rows) =>
+                              rows.map((r) =>
+                                r.id === row.id
+                                  ? { ...r, participant_name: e.target.value }
+                                  : r,
+                              ),
+                            )
+                          }
+                          placeholder="Full name as the participant wishes to be credited"
+                          className="input"
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+        <button
+          type="button"
+          onClick={() => setStoryRows((rows) => [...rows, blankStory()])}
+          className="mt-4 inline-flex items-center gap-2 rounded-lg border-2 border-dashed border-[#a05c00] bg-white px-4 py-2 text-[13px] font-bold text-[#a05c00] transition-colors hover:bg-[#fff4dc]"
+        >
+          <span aria-hidden="true" className="text-lg leading-none">
+            +
+          </span>
+          Add a success story
+        </button>
+      </SectionCard>
+
+      <SectionCard
+        number={5}
         accent="purple"
         title="Declaration"
         subtitle="Please confirm before submitting."

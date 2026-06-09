@@ -151,6 +151,12 @@ export const PARTNER_INSTITUTIONS = [
 // faculty types a free-text name in a separate input".
 export const PARTNER_OTHER_SENTINEL = "Other (specify)" as const;
 
+// Phase 4: the docx's exact participant consent language, used in both
+// the public form's checkbox and the submission detail page so consent
+// statements stay verbatim across the deployment.
+export const SUCCESS_STORY_CONSENT_TEXT =
+  "Participant consents to being featured in Nkabom Collaborative and Mastercard Foundation communications materials and follow-up storytelling activities." as const;
+
 export const ACTIVITY_STATUSES = ["Completed", "Ongoing", "Planned"] as const;
 
 // Activity type taxonomy from the Partner Narrative Report template's

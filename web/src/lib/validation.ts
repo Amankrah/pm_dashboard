@@ -54,6 +54,24 @@ export const challengeSchema = z.object({
   response_approach: z.string().optional(),
 });
 
+// Phase 4: Success Stories. Hard rule: participant_name is null unless
+// consent is true. We accept input either way but normalise here.
+export const successStorySchema = z
+  .object({
+    participant_name: z.string().optional(),
+    program_activity: z.string().min(1),
+    location: z.string().optional(),
+    story: z.string().min(1),
+    outcomes: z.string().optional(),
+    photo_url: z.string().url().optional().or(z.literal("").transform(() => undefined)),
+    consent: z.boolean(),
+  })
+  .transform((v) => ({
+    ...v,
+    // Privacy guard: drop the name if the participant did not consent.
+    participant_name: v.consent ? v.participant_name?.trim() || undefined : undefined,
+  }));
+
 // Phase 1d: participant counts. Each is a non-negative integer or absent.
 // "absent" maps to NULL in the DB ("not reported"); 0 is preserved as 0
 // ("explicitly zero").
@@ -110,6 +128,8 @@ export const submissionPayloadSchema = z.object({
   // Phase 2: structured Challenges. Optional; faculty with nothing to
   // report leave it empty.
   challenges: z.array(challengeSchema).optional(),
+  // Phase 4: participant-centred Success Stories. Optional.
+  success_stories: z.array(successStorySchema).optional(),
   additional: z
     .object({
       resources_needed: z.string().optional(),
