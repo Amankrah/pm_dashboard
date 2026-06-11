@@ -7,11 +7,67 @@
   --acc: #1a6b44;
   --ent: #a05c00;
   --bg: #edf1f7;
+
+  /* Luxury institutional palette — used by the dashboard shell */
+  --ink: #0b1623;
+  --ink-2: #122035;
+  --ink-3: #1a2c47;
+  --gold: #c9a961;
+  --gold-soft: #d8be84;
+  --brass: #8e7548;
+  --cream: #f5f0e1;
+  --cream-2: #f4f1ea;
+  --parchment: #f7f3ea;
+}
+
+html {
+  font-family:
+    var(--font-sans),
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    sans-serif;
 }
 
 body {
   background: var(--bg);
   color: #0f172a;
+}
+
+.font-display {
+  font-family: var(--font-display), "Cormorant Garamond", "EB Garamond", Georgia, serif;
+  font-feature-settings: "lnum" 1, "kern" 1;
+}
+
+.tracking-luxe {
+  letter-spacing: 0.22em;
+}
+
+@keyframes gilt-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes nav-fade-in {
+  from {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
 }
 
 .input {
